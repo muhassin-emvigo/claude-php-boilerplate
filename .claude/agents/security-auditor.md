@@ -45,6 +45,36 @@ You are a Magento 2 security auditor.
 - Exception messages don't reveal internals
 - Debug mode checks before verbose output
 
+
+In addition to general PHP security review, check changed files against these Magento 2
+vulnerability classes specifically:
+
+- **Direct PDO/raw SQL**: flag any `$connection->query()` with interpolated variables instead of
+  bound parameters; flag any direct PDO use bypassing Resource Models / `SearchCriteriaBuilder`.
+- **Missing CSRF on custom controllers**: any `Controller` extending `Action` that handles POST
+  must either implement `CsrfAwareActionInterface` or rely on the standard form-key validation —
+  flag controllers that disable it via `createCsrfValidationException` returning `null` without
+  justification.
+- **ACL gaps**: every admin controller must declare an `ADMIN_RESOURCE` constant matching an entry
+  in `acl.xml`; flag controllers with no matching ACL node or with `Magento_Backend::admin` used
+  as a catch-all instead of a scoped resource.
+- **Unescaped template output**: flag any `.phtml` echoing `$block->get*()` or ViewModel output
+  without `$escaper->escapeHtml()` / `escapeHtmlAttr()` / `escapeUrl()` as appropriate to context.
+- **Insecure deserialization**: flag `unserialize()` on any input that could originate from a
+  customer-facing form, cookie, or session — Magento's `Magento\Framework\Serialize\Serializer\Json`
+  should be used instead.
+- **Layout XML / block injection**: flag any layout update or block class instantiated from
+  request parameters without an allowlist (potential for arbitrary block/template inclusion).
+- **REST/SOAP webapi.xml exposure**: any new `Api/` interface exposed via `webapi.xml` should have
+  its ACL resource and `secure` flag reviewed — flag endpoints exposed without authentication that
+  touch customer or order data.
+- **File upload handling**: flag any `Magento\MediaStorage` or raw `move_uploaded_file()` usage
+  that doesn't validate extension/mime type against an allowlist.
+
+Report findings the same way as general security findings (Blocking / Should Fix / Nit), but tag
+these specifically as `[magento]` so they're easy to distinguish from generic PHP findings.
+
+
 ## Scan Commands
 ```bash
 # Find potential raw SQL
