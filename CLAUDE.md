@@ -39,6 +39,12 @@ make clean           # Clean generated files
 
 ## Directory Structure
 ```
+.claude/
+├── agents/           # Specialized Claude agents (architect, reviewer, etc.)
+├── commands/         # Custom slash commands (/test, /lint, /review)
+├── hooks/            # Claude Code hooks (pre-commit-validate.sh)
+├── rules/            # Project-specific AI rules
+└── workflows/        # Step-by-step developer runbooks
 app/code/{Vendor}/{Module}/
 ├── Api/              # Service contract interfaces
 │   └── Data/         # Data transfer object interfaces
