@@ -7,4 +7,4 @@ allowed-tools:
   - Bash
 ---
 
-Read and follow the bug-fix workflow: .agents/workflows/bug-fix.md
+Read and follow the bug-fix workflow: .claude/workflows/bug-fix.md

@@ -7,4 +7,4 @@ allowed-tools:
   - Bash
 ---
 
-Read and follow the new-feature workflow: .agents/workflows/new-feature.md
+Read and follow the new-feature workflow: .claude/workflows/new-feature.md
