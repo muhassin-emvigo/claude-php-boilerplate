@@ -16,7 +16,7 @@ allowed-tools:
 2. Run quality tools on changed PHP files:
    ```bash
    # PHPCS - Coding standards
-   vendor/bin/phpcs --standard=Magento2 --report=full [files]
+   vendor/bin/phpcs --standard=phpcs.xml.dist --report=full [files]
 
    # PHPStan - Static analysis
    vendor/bin/phpstan analyse --no-progress [files]

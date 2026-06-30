@@ -31,7 +31,7 @@ Gather and display project health:
 
 4. **Lint Summary**:
    ```bash
-   vendor/bin/phpcs --standard=Magento2 --report=summary app/code/ 2>&1 | tail -5
+   vendor/bin/phpcs --standard=phpcs.xml.dist --report=summary app/code/ 2>&1 | tail -5
    ```
 
 5. Present as a dashboard:
