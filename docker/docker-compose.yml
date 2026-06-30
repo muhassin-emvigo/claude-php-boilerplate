@@ -1,0 +1,91 @@
+# ============================================================
+# Magento 2 Development Environment (Optional)
+# Start: docker compose up -d
+# Stop:  docker compose down
+# ============================================================
+
+version: '3.8'
+
+services:
+  php:
+    image: php:8.2-fpm
+    container_name: magento2-php
+    volumes:
+      - ../:/var/www/html:cached
+    working_dir: /var/www/html
+    environment:
+      PHP_MEMORY_LIMIT: 2G
+      PHP_MAX_EXECUTION_TIME: 18000
+    depends_on:
+      - db
+      - redis
+      - opensearch
+    networks:
+      - magento
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: magento2-nginx
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ../:/var/www/html:cached
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - magento
+
+  db:
+    image: mysql:8.0
+    container_name: magento2-db
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-magento}
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - magento
+
+  redis:
+    image: redis:7-alpine
+    container_name: magento2-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - magento
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: magento2-opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "${OPENSEARCH_PORT:-9200}:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - magento
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: magento2-mailhog
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_UI_PORT:-8025}:8025"
+    networks:
+      - magento
+
+volumes:
+  db_data:
+  opensearch_data:
+
+networks:
+  magento:
+    driver: bridge

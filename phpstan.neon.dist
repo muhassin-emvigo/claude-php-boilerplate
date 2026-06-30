@@ -1,0 +1,15 @@
+parameters:
+    level: 6
+    paths:
+        - app/code
+    excludePaths:
+        analyseAndScan:
+            - '*/Test/*'
+            - 'generated/*'
+            - 'vendor/*'
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Magento framework quirks
+        - '#Call to an undefined method Magento\\Framework\\App\\RequestInterface::#'
+        - '#Call to an undefined method Magento\\Framework\\App\\ResponseInterface::#'

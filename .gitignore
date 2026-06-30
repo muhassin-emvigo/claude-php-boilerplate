@@ -1,0 +1,49 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.buildpath
+nbproject/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# PHP Tools Cache
+.phpcs-cache
+.php-cs-fixer.cache
+.phpunit.cache/
+.phpunit.result.cache
+phpstan-baseline.neon
+
+# Coverage Reports
+coverage/
+
+# Build
+generated/
+pub/static/
+var/
+
+# Environment
+.env
+.env.local
+*.env
+!.env.docker.example
+
+# Docker
+docker/data/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Composer
+composer.lock

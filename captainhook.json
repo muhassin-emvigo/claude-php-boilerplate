@@ -1,0 +1,56 @@
+{
+    "commit-msg": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "\\CaptainHook\\App\\Hook\\Message\\Action\\Regex",
+                "options": {
+                    "regex": "#^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\\(.+\\))?!?:\\s.{1,72}$#"
+                }
+            }
+        ]
+    },
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "vendor/bin/phpcs --standard=phpcs.xml.dist {$STAGED_FILES|of-type:php|separated-by: }",
+                "conditions": [
+                    {
+                        "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",
+                        "args": ["php"]
+                    }
+                ]
+            },
+            {
+                "action": "vendor/bin/phpstan analyse --no-progress {$STAGED_FILES|of-type:php|separated-by: }",
+                "conditions": [
+                    {
+                        "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",
+                        "args": ["php"]
+                    }
+                ]
+            }
+        ]
+    },
+    "pre-push": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "vendor/bin/phpunit -c phpunit.xml.dist --testsuite 'Unit Tests'"
+            }
+        ]
+    },
+    "post-checkout": {
+        "enabled": false,
+        "actions": []
+    },
+    "post-merge": {
+        "enabled": false,
+        "actions": []
+    },
+    "post-rewrite": {
+        "enabled": false,
+        "actions": []
+    }
+}
