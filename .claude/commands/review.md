@@ -1,40 +1,36 @@
----
-description: Run comprehensive code review on changed files with all quality tools
-allowed-tools:
-  - Read
-  - Bash
-  - Grep
----
+# /review
 
-# Code Review
+Activates the Review agent on the current worktree branch.
+Only valid after Testing agent has passed (all tests green).
 
-1. Get changed files:
-   ```bash
-   git diff --name-only --diff-filter=d HEAD 2>/dev/null || find app/code -name '*.php' -newer composer.json
-   ```
+## Usage
+```
+/review
+/review <task-id>
+```
 
-2. Run quality tools on changed PHP files:
-   ```bash
-   # PHPCS - Coding standards
-   vendor/bin/phpcs --standard=phpcs.xml.dist --report=full [files]
+## Preconditions (orchestrator enforces)
+- Testing agent output exists and shows all tests green
+- For security-patch: security-guidance output from Testing agent exists
+- Worktree branch has uncommitted or committed-but-unpushed changes
 
-   # PHPStan - Static analysis
-   vendor/bin/phpstan analyse --no-progress [files]
+## What happens
+1. Review agent activates (.claude/agents/review.md)
+2. Runs code-review on full diff
+3. Runs security-guidance on full diff
+4. Reads claude-mem for architectural/security context
+5. Produces review checklist with APPROVED or BLOCKED decision
 
-   # PHPMD - Mess detection
-   vendor/bin/phpmd [files] text phpmd.xml.dist
-   ```
+## On APPROVED
+- Review agent outputs exact git commit + git push commands
+- Commit includes Reviewed-by: review-agent
+- /approve then activates Ship agent
 
-3. For each file, also manually review:
-   - declare(strict_types=1) present
-   - No ObjectManager direct usage
-   - Proper type hints on all methods
-   - Security: escaping in templates, ACL in controllers
-   - Tests exist for new/modified public methods
+## On BLOCKED
+- Review agent outputs specific BLOCKER findings
+- Build agent reactivates with the checklist
+- /status shows loopback count
 
-4. Output a structured review report:
-   - 🔴 Critical issues (must fix)
-   - 🟡 Warnings (should fix)
-   - 🔵 Suggestions (nice to have)
-   - ✅ What looks good
-   - 📊 Summary stats (files reviewed, issues by severity)
+## Hard rule
+This command cannot be run by Build or Testing agents internally.
+Only the user or orchestrator may invoke /review.

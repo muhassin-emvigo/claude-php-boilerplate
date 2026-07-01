@@ -1,48 +1,31 @@
----
-description: Quick project health dashboard — branch, tests, lint, modules
-allowed-tools:
-  - Bash
-  - Read
-  - Grep
----
+# /status
 
-# Project Status
+Shows current pipeline state for the active task.
 
-Gather and display project health:
+## Usage
+```
+/status
+/status <task-id>
+```
 
-1. **Git Info**:
-   ```bash
-   echo "Branch: $(git branch --show-current 2>/dev/null || echo 'not a git repo')"
-   echo "Last commits:"
-   git log --oneline -5 2>/dev/null || echo 'No git history'
-   echo "Uncommitted changes:"
-   git status --short 2>/dev/null || echo 'N/A'
-   ```
+## Output
+```
+Task:        <task-id>
+Flow:        <flow_type>
+Stage:       <current stage name>
+Gate:        PENDING / PASSED / BLOCKED
+Last agent:  <agent name>
+Loopbacks:   <count> (Build→Test: N, Review→Build: N)
 
-2. **Modules**:
-   ```bash
-   find app/code -name 'module.xml' -exec grep -l 'module name' {} \; 2>/dev/null
-   ```
+Docs:
+  Brief:     docs/spec-<id>.md  [exists / missing]
+  Spec:      docs/spec-<id>.md  [exists / missing]
+  Design:    docs/design-<id>.md [exists / missing]
+  Progress:  docs/progress.md   [last updated: <timestamp>]
 
-3. **Quick Test Check**:
-   ```bash
-   vendor/bin/phpunit -c phpunit.xml.dist --no-coverage 2>&1 | tail -3
-   ```
+Branch:      task/<id>  [local / pushed / merged]
+Commit gate: LOCKED (Review: pending) / OPEN (Review: approved)
+```
 
-4. **Lint Summary**:
-   ```bash
-   vendor/bin/phpcs --standard=phpcs.xml.dist --report=summary app/code/ 2>&1 | tail -5
-   ```
-
-5. Present as a dashboard:
-   ```
-   ╔══════════════════════════════════════╗
-   ║     Magento 2 Module Dashboard      ║
-   ╠══════════════════════════════════════╣
-   ║ Branch:    feature/my-feature       ║
-   ║ Modules:   2 registered             ║
-   ║ Tests:     ✅ 15/15 passing         ║
-   ║ Lint:      ⚠️  3 warnings           ║
-   ║ Coverage:  82%                      ║
-   ╚══════════════════════════════════════╝
-   ```
+## Arguments
+$ARGUMENTS — optional task-id. If omitted, shows most recent active task.

@@ -1,43 +1,34 @@
----
-description: Pre-push validation pipeline — lint, test, security check, and prepare for shipping
-allowed-tools:
-  - Bash
-  - Read
-  - Grep
-  - Edit
----
+# /ship
 
-# Ship Pipeline
+Activates the Ship agent. Merges, tags, and closes the task.
+Only valid after Review agent has issued APPROVED and branch is pushed.
 
-Full pre-push quality gate:
+## Usage
+```
+/ship
+/ship <task-id>
+```
 
-1. **Lint Check**:
-   ```bash
-   make lint && make phpstan && make phpmd
-   ```
-   ❌ If any check fails, stop and report issues.
+## Preconditions (orchestrator enforces — hard stop if not met)
+1. Review agent decision: APPROVED (in current session or docs/review-<id>.md)
+2. Branch pushed to remote: `git ls-remote origin task/<id>` returns a ref
+3. Commit on branch contains: `Reviewed-by: review-agent`
 
-2. **Test Suite**:
-   ```bash
-   make test
-   ```
-   ❌ If tests fail, stop and report failures.
+If any precondition fails — /ship is rejected with the specific reason.
 
-3. **Security Scan**:
-   ```bash
-   # Check for common vulnerabilities
-   grep -rn 'ObjectManager::getInstance' app/code/ --include='*.php' | grep -v Test
-   grep -rn 'echo \$' app/code/ --include='*.phtml'
-   grep -rn 'unserialize(' app/code/ --include='*.php'
-   ```
-   ⚠️ Flag any findings.
+## What happens
+1. Ship agent activates (.claude/agents/ship.md)
+2. Runs gstack /ship — merge to main, tag, push
+3. Generates changelog entry
+4. Runs /wrapup retrospective
+5. Writes to claude-mem: retro, new patterns, new tokens, security conventions
 
-4. **Changelog Check**:
-   - Read CHANGELOG.md
-   - Check if there are unreleased changes documented
-   - If not, ask user to describe changes and update CHANGELOG.md
+## Output
+- Merge commit hash
+- Tag name
+- Changelog entry (appended to CHANGELOG.md)
+- Wrapup summary
+- claude-mem keys updated
 
-5. **Summary**:
-   - ✅ All checks passed / ❌ Issues found
-   - Files changed: `git diff --stat`
-   - Ready to push: Yes/No
+## Arguments
+$ARGUMENTS — optional task-id. If omitted, ships the most recent approved task.
