@@ -1,6 +1,7 @@
 ---
 globs:
   - "**/*.php"
+priority: 20
 ---
 
 # Error Handling Rules

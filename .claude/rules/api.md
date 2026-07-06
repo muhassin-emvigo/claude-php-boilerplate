@@ -3,6 +3,7 @@ globs:
   - "**/Api/**"
   - "**/webapi.xml"
   - "**/Controller/**"
+priority: 50
 ---
 
 # API & Web API Rules

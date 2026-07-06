@@ -2,6 +2,7 @@
 globs:
   - "**/*.php"
   - "**/*.phtml"
+priority: 100
 ---
 
 # Security Rules

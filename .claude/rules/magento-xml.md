@@ -2,6 +2,7 @@
 globs:
   - "**/*.xml"
   - "**/*.xsd"
+priority: 40
 ---
 
 # Magento XML Configuration Rules

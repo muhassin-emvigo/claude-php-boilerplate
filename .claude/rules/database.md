@@ -3,6 +3,7 @@ globs:
   - "**/db_schema*"
   - "**/Setup/**"
   - "**/ResourceModel/**"
+priority: 50
 ---
 
 # Database Rules
