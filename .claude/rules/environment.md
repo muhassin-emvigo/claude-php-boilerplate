@@ -3,6 +3,7 @@ globs:
   - "**/*.php"
   - "**/env.php"
   - "**/.env*"
+priority: 20
 ---
 
 # Environment & Configuration Rules

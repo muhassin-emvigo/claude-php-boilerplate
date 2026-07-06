@@ -2,6 +2,7 @@
 globs:
   - "app/code/**/*.php"
   - "app/code/**/*.xml"
+priority: 30
 ---
 
 # Magento Module Rules
