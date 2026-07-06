@@ -2,7 +2,6 @@
 globs:
   - "**/*.php"
   - "**/*.phtml"
-priority: 10
 ---
 
 # PHP General Rules
