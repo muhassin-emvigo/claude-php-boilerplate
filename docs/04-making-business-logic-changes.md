@@ -2,6 +2,8 @@
 
 This explains where to make changes, the steps to see them take effect, and how to reuse this same setup pattern for other projects.
 
+> Working from a request someone submitted via [05-requesting-a-change.md](05-requesting-a-change.md)? Check `docs/requirements/` for the file describing what's needed, and update its `Status` line as you work (`New` → `In Progress` → `Done`).
+
 ## Where your own code lives
 
 All custom business logic belongs in one place:
