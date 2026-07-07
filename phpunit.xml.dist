@@ -8,21 +8,18 @@
          failOnWarning="true">
     <testsuites>
         <testsuite name="Unit Tests">
-            <directory suffix="Test.php">app/code/*/Test/Unit</directory>
-            <directory suffix="Test.php">app/code/*/*/Test/Unit</directory>
+            <directory suffix="Test.php">app/code/vendor/CustomShipping/Test/Unit</directory>
         </testsuite>
         <testsuite name="Integration Tests">
-            <directory suffix="Test.php">app/code/*/Test/Integration</directory>
-            <directory suffix="Test.php">app/code/*/*/Test/Integration</directory>
+            <directory suffix="Test.php">app/code/vendor/CustomShipping/Test/Integration</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
-            <directory suffix=".php">app/code</directory>
+            <directory suffix=".php">app/code/vendor/CustomShipping</directory>
         </include>
         <exclude>
-            <directory>app/code/*/Test</directory>
-            <directory>app/code/*/*/Test</directory>
+            <directory>app/code/vendor/CustomShipping/Test</directory>
         </exclude>
     </source>
 </phpunit>

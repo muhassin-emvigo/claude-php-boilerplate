@@ -26,12 +26,12 @@ to, not for changing what's underneath it.
    never edit Magento core's schema files directly.
    ```graphql
    type Query {
-       vendorModuleEntity(id: Int! @doc(description: "Entity ID")): VendorModuleEntity
-           @resolver(class: "Vendor\\Module\\Model\\Resolver\\Entity")
+       vendorModuleEntity(id: Int! @doc(description: "Entity ID")): vendorModuleEntity
+           @resolver(class: "vendor\\Module\\Model\\Resolver\\Entity")
            @doc(description: "Get a single entity by ID")
    }
 
-   type VendorModuleEntity @doc(description: "Entity data") {
+   type vendorModuleEntity @doc(description: "Entity data") {
        id: Int!
        name: String
        created_at: String

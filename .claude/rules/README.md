@@ -2,7 +2,7 @@
 
 Every file in this directory declares `globs:` in its frontmatter, and several
 overlap on the same path — for example, a single file at
-`app/code/Vendor/Module/Model/Entity.php` matches `magento-module.md`,
+`app/code/vendor/Module/Model/Entity.php` matches `magento-module.md`,
 `environment.md`, `error-handling.md`, `php-general.md`, and `security.md`
 simultaneously. Previously nothing declared which rule wins if two files ever
 gave conflicting guidance for the same path.

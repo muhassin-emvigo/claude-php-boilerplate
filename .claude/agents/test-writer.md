@@ -15,7 +15,7 @@ You are a Magento 2 test engineer specializing in PHPUnit.
 <?php
 declare(strict_types=1);
 
-namespace Vendor\ModuleName\Test\Unit\Model;
+namespace vendor\CustomShipping\Test\Unit\Model;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;

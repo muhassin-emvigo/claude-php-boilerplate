@@ -10,7 +10,7 @@ priority: 50
 
 ## Declarative Schema
 - Use `db_schema.xml` for ALL schema definitions — never use `InstallSchema` or `UpgradeSchema`
-- Always generate whitelist after schema changes: `bin/magento setup:db-declaration:generate-whitelist --module-name=Vendor_ModuleName`
+- Always generate whitelist after schema changes: `bin/magento setup:db-declaration:generate-whitelist --module-name=vendor_CustomShipping`
 - Include `db_schema_whitelist.json` in version control
 
 ## Naming Conventions

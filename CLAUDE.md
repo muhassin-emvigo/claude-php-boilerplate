@@ -24,7 +24,7 @@ It provides a standardized skeleton, quality tooling, and AI-assisted workflows.
 
 ## Key Commands
 ```bash
-make init            # First-time setup: rename Vendor/ModuleName
+make init            # First-time setup: rename vendor/CustomShipping
 make install         # Install Composer dependencies
 make test            # Run PHPUnit tests
 make test-coverage   # Tests with HTML coverage report
@@ -45,7 +45,7 @@ make clean           # Clean generated files
 ├── hooks/            # Claude Code hooks (pre-commit-validate.sh)
 ├── rules/            # Project-specific AI rules
 └── workflows/        # Step-by-step developer runbooks
-app/code/{Vendor}/{Module}/
+app/code/{vendor}/{Module}/
 ├── Api/              # Service contract interfaces
 │   └── Data/         # Data transfer object interfaces
 ├── Block/            # Block classes (prefer ViewModel)

@@ -19,9 +19,9 @@ priority: 50
 - Define routes in `etc/webapi.xml`:
   ```xml
   <route url="/V1/vendor-module/entities/:id" method="GET">
-      <service class="Vendor\Module\Api\EntityRepositoryInterface" method="getById"/>
+      <service class="vendor\Module\Api\EntityRepositoryInterface" method="getById"/>
       <resources>
-          <resource ref="Vendor_Module::manage"/>
+          <resource ref="vendor_Module::manage"/>
       </resources>
   </route>
   ```
@@ -41,6 +41,6 @@ priority: 50
 - Frontend controllers extend `\Magento\Framework\App\Action\Action`
 - Admin controllers extend `\Magento\Backend\App\Action`
 - One action per controller class (single `execute()` method)
-- Admin controllers must declare `const ADMIN_RESOURCE = 'Vendor_Module::resource'`
+- Admin controllers must declare `const ADMIN_RESOURCE = 'vendor_Module::resource'`
 - Return proper result types: `JsonFactory`, `PageFactory`, `RedirectFactory`, `RawFactory`
 - Use `RequestInterface` for input — never `$_GET`, `$_POST`, `$_REQUEST`

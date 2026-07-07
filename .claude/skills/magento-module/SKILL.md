@@ -12,7 +12,7 @@ description: >
 
 ### 1. Gather Information
 Ask the user for:
-- **Vendor name** (e.g., `Acme`)
+- **vendor name** (e.g., `Acme`)
 - **Module name** (e.g., `CustomShipping`)
 - **Module purpose** (brief description)
 - **Dependencies** (which Magento modules it depends on)
@@ -20,7 +20,7 @@ Ask the user for:
 
 ### 2. Create Base Structure
 ```
-app/code/{Vendor}/{Module}/
+app/code/{vendor}/{Module}/
 ├── registration.php
 ├── composer.json
 ├── etc/
@@ -40,7 +40,7 @@ use Magento\Framework\Component\ComponentRegistrar;
 
 ComponentRegistrar::register(
     ComponentRegistrar::MODULE,
-    '{Vendor}_{Module}',
+    '{vendor}_{Module}',
     __DIR__
 );
 ```
@@ -50,7 +50,7 @@ ComponentRegistrar::register(
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="{Vendor}_{Module}">
+    <module name="{vendor}_{Module}">
         <sequence>
             <!-- Add dependencies here -->
         </sequence>
@@ -79,7 +79,7 @@ Based on user requirements, create:
 
 ### 7. Validate
 ```bash
-php -l app/code/{Vendor}/{Module}/registration.php
-vendor/bin/phpcs --standard=Magento2 app/code/{Vendor}/{Module}/
-vendor/bin/phpstan analyse app/code/{Vendor}/{Module}/
+php -l app/code/{vendor}/{Module}/registration.php
+vendor/bin/phpcs --standard=Magento2 app/code/{vendor}/{Module}/
+vendor/bin/phpstan analyse app/code/{vendor}/{Module}/
 ```

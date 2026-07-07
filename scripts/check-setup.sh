@@ -87,7 +87,7 @@ else
     check_warn "Claude CLI not found (optional — install for AI-assisted development)"
 fi
 
-# Vendor dependencies
+# vendor dependencies
 echo -e "\n${BOLD}Dependencies:${NC}"
 if [ -d "vendor" ]; then
     check_pass "vendor/ directory exists"

@@ -2,6 +2,40 @@
 /vendor/
 node_modules/
 
+# ------------------------------------------------------------------
+# Magento core files deployed by Composer (magento/magento2-base and
+# friends). None of this is our code — it's regenerated automatically
+# by `composer install` / `make magento-install`. Only app/code/ (our
+# module) and the project's own scaffolding files should be tracked.
+# ------------------------------------------------------------------
+/.htaccess
+/.htaccess.sample
+/.user.ini
+/COPYING.txt
+/Gruntfile.js.sample
+/LICENSE.txt
+/LICENSE_AFL.txt
+/SECURITY.md
+/auth.json.sample
+/bin/
+/dev/
+/grunt-config.json.sample
+/lib/
+/nginx.conf.sample
+/package.json.sample
+/phpserver/
+/pub/
+/setup/
+/app/.htaccess
+/app/autoload.php
+/app/bootstrap.php
+/app/design/
+/app/etc/*
+!/app/etc/.gitkeep
+/generated/
+/var/
+vendor.bak.*/
+
 # IDE
 .idea/
 .vscode/
@@ -28,22 +62,15 @@ phpstan-baseline.neon
 # Coverage Reports
 coverage/
 
-# Build
-generated/
-pub/static/
-var/
-
 # Environment
 .env
 .env.local
 *.env
 !.env.docker.example
+auth.json
 
 # Docker
 docker/data/
 
 # Claude Code local settings
 .claude/settings.local.json
-
-# Composer
-composer.lock
