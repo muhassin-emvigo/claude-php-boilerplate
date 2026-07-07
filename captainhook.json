@@ -37,7 +37,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "php vendor/bin/phpunit -c phpunit.xml.dist --testsuite 'Unit Tests'"
+                "action": "php vendor/bin/phpunit -c phpunit.xml.dist --testsuite \"Unit Tests\""
             }
         ]
     },
