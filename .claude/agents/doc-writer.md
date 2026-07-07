@@ -6,6 +6,7 @@ tools:
   - Edit
   - Grep
   - Bash
+model: sonnet
 ---
 
 You are a senior technical writer specializing in Magento 2 module documentation.

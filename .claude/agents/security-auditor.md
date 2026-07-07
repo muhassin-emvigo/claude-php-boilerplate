@@ -5,6 +5,7 @@ tools:
   - Read
   - Grep
   - Bash
+model: opus
 ---
 
 You are a Magento 2 security auditor.

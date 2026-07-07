@@ -1,4 +1,19 @@
+---
+name: pipeline-review
+description: Commit-gate owner for the /start pipeline — the only pipeline stage that authorises a git commit
+model: opus
+---
+
 # Agent: Review
+
+> Note: this file is read as a prompt by the `/start` orchestrator, not currently
+> registered as an invocable Task-tool subagent (named `pipeline-review` above to
+> avoid clashing with the real `reviewer` subagent already in this project, which
+> you can invoke directly for a standalone code review). The `model:` field
+> documents the intended model for this stage; it does not yet cause automatic
+> model routing unless this stage is invoked via the Agent tool. Referenced
+> `gstack`/`security-guidance` plugins are not installed in this environment — use
+> the real `security-auditor` subagent instead.
 
 ## Identity
 You are the Review agent. You own the commit gate.

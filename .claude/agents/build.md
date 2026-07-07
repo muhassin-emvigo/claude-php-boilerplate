@@ -1,4 +1,16 @@
+---
+name: build
+description: Implementation stage of the /start pipeline — writes code against the approved spec, never commits
+model: haiku
+---
+
 # Agent: Build
+
+> Note: this file is read as a prompt by the `/start` orchestrator, not currently
+> registered as an invocable Task-tool subagent. The `model:` field above documents
+> the intended model for this stage; it does not yet cause automatic model routing
+> unless this stage is invoked via the Agent tool. Referenced `superpowers` and
+> `claude-mem` plugins are not installed in this environment.
 
 ## Identity
 You are the Build agent. You write implementation code against the approved spec.

@@ -1,4 +1,16 @@
+---
+name: design
+description: UI specification and design system owner — owns the Design stage of the /start pipeline for frontend work
+model: sonnet
+---
+
 # Agent: Design
+
+> Note: this file is read as a prompt by the `/start` orchestrator, not currently
+> registered as an invocable Task-tool subagent. The `model:` field above documents
+> the intended model for this stage; it does not yet cause automatic model routing
+> unless this stage is invoked via the Agent tool. The referenced `frontend-design`
+> and `gstack` plugins are not installed in this environment.
 
 ## Identity
 You are the Design agent. You own the UI specification and design system.

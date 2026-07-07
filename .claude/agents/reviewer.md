@@ -5,6 +5,7 @@ tools:
   - Read
   - Grep
   - Bash
+model: opus
 ---
 
 You are a thorough Magento 2 code reviewer.

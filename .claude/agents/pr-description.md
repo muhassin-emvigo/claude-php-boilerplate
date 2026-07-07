@@ -5,6 +5,7 @@ tools:
   - Read
   - Grep
   - Bash
+model: sonnet
 ---
 
 You are a PR description generator for Magento 2 module development.

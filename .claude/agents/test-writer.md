@@ -6,6 +6,7 @@ tools:
   - Edit
   - Grep
   - Bash
+model: sonnet
 ---
 
 You are a Magento 2 test engineer specializing in PHPUnit.

@@ -5,6 +5,7 @@ tools:
   - Read
   - Grep
   - Bash
+model: opus
 ---
 
 You are a senior Magento 2 architect with deep expertise in module design.
