@@ -1,4 +1,4 @@
-.PHONY: help init install magento-install magento-run fix-windows test test-coverage lint lint-fix phpstan phpmd check check-setup clean
+.PHONY: help init install magento-install magento-run fix-windows usage test test-coverage lint lint-fix phpstan phpmd check check-setup clean
 
 # GNU Make on Windows defaults to cmd.exe, which cannot run vendor/bin/* directly.
 # Use Git Bash when available (install Git for Windows: https://git-scm.com/download/win).
@@ -46,6 +46,9 @@ magento-run: ## Start MySQL/OpenSearch/Apache and open the storefront (runs star
 
 fix-windows: ## Re-apply Windows compatibility fixes to vendor/ (safe to re-run any time)
 	@php scripts/fix-windows-vendor-bugs.php
+
+usage: ## Show local Claude Code token/cost usage (via npx ccusage)
+	@npx ccusage@latest daily
 
 ## —— Quality ——————————————————————————————————————————————————
 test: ## Run PHPUnit tests

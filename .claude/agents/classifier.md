@@ -1,7 +1,7 @@
 ---
 name: classifier
 description: Task size classifier — sizes the task and picks the pipeline tier/branch name, run first on /start
-model: sonnet
+model: haiku
 mode: plan
 ---
 
@@ -13,6 +13,12 @@ mode: plan
 > automatic routing unless this stage is invoked via the Agent tool.
 >
 > **Operating Mode: Planning.** Emit the classification tags only — never edit files.
+>
+> **Model: Haiku by default** (this stage is meant to cost ~50 tokens). **Escalate
+> to Sonnet** if the task description is ambiguous enough that a cheap pass risks
+> misclassifying size/branch type — a static `model:` field can't make this call
+> automatically, so whoever invokes this stage should pass the override explicitly
+> when the description doesn't cleanly fit the nano/standard/full criteria below.
 
 Runs immediately on `/start`. Costs ~50 tokens.
 Determines which pipeline tier to activate. Nothing else loads until this completes.

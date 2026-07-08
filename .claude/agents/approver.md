@@ -5,7 +5,7 @@ tools:
   - Read
   - Grep
   - Bash
-model: fable
+model: sonnet
 mode: decision
 ---
 
@@ -16,6 +16,13 @@ Do not redo analysis other agents already did — verify their findings against 
 checklist below and render a clear APPROVED/BLOCKED decision. No file edits.
 You do not review code quality yourself — that's the Reviewer agent's job. You verify
 that the required gates were actually passed, and catch anything that slipped through.
+
+## Model: Sonnet by default. Escalate to Fable 5 only if high-risk
+High-risk means: the change is a hotfix or security-patch, touches payment/customer
+data, or the Review agent's findings included any BLOCKER that was resolved with a
+workaround rather than a root-cause fix. A static `model:` field can't detect this
+automatically — check the checklist below first, and if any high-risk flag applies,
+request the Fable 5 override before rendering the final decision.
 
 ## Your Role
 - Confirm the Code Review agent's verdict was APPROVED, not just requested

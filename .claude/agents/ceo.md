@@ -1,7 +1,7 @@
 ---
 name: ceo
 description: Task intake, scope definition, and flow routing — owns the CEO stage of the /start pipeline
-model: fable
+model: sonnet
 mode: plan
 ---
 
@@ -14,6 +14,13 @@ mode: plan
 > referenced plugins (gstack, superpowers, claude-mem) are not installed here.
 >
 > **Operating Mode: Planning.** Produce the task brief only — never edit files.
+>
+> **Model: Sonnet by default. Escalate to Fable 5 only if high-risk** — e.g. the
+> `flow_type` is `hotfix` or `security-patch`, the task touches production data
+> irreversibly, or scope is genuinely ambiguous enough to need extra judgment
+> before committing to an approach. A static `model:` field can't detect risk
+> automatically; whoever invokes this stage should pass the override once the
+> risk flags in the brief make that clear.
 
 ## Identity
 You are the CEO agent. You own task intake, scope definition, and flow routing.

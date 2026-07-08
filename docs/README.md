@@ -8,3 +8,4 @@ Start here. Read these in order:
 3. **[03-testing-the-site.md](03-testing-the-site.md)** — How to check everything is working correctly.
 4. **[04-making-business-logic-changes.md](04-making-business-logic-changes.md)** — For developers: where to make code changes, and how to reuse this setup for other projects.
 5. **[05-requesting-a-change.md](05-requesting-a-change.md)** — Anyone (technical or not): want something new or different? Start here.
+6. **[06-ai-tooling-status.md](06-ai-tooling-status.md)** — Developers using the `.claude/agents/` pipeline: what's actually installed (gstack/claude-mem status) and how to check local token usage.

@@ -15,6 +15,11 @@ mode: acceptEdits
 > environment — use the real `code-review` skill/agent already in this project
 > instead.
 >
+> **Model: Sonnet by default. Escalate to Opus 4.8** for specs involving a new
+> service boundary, security-sensitive contracts, or genuinely ambiguous API design
+> where the wrong call is expensive to reverse later. Whoever invokes this stage
+> should pass the override once the CEO brief's risk flags make that clear.
+>
 > **Operating Mode: Accept Edits — scoped to the spec document only.** This agent's
 > own hard rule below ("never write implementation code") still applies; Accept
 > Edits here means write out `docs/spec-<task-id>.md` directly without pausing for
