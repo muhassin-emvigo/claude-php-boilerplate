@@ -167,6 +167,28 @@ lean_tiers:
     skips: [eng, design, testing]
     escalation: "Build may emit <escalate>full</escalate>; classifier re-runs and reloads the full phase graph"
 
+# Extended tier: full phase graph above, plus 9 additional agents not modeled as
+# graph phases (they wrap standalone subagents rather than pipeline-stage prompts).
+# Triggered explicitly via /full-flow, not by classifier task_size.
+extended_tiers:
+  full_16:
+    source: .claude/workflows/pipeline-full-16.md
+    command: /full-flow docs/requirements/<file>.md
+    extends: full (the 7-phase graph above)
+    additional_phases:
+      architecture: { after: ceo, before: eng, optional: true, agent: .claude/agents/architect.md }
+      unit_testing: { after: build, before: qa_testing, agent: .claude/agents/test-writer.md }
+      qa_testing: { alias_of: testing, note: "same phase, renamed for full_16's naming" }
+      security_testing: { after: qa_testing, agent: .claude/agents/security-auditor.md }
+      performance_testing: { after: security_testing, agent: .claude/agents/performance-tester.md }
+      bug_fixing: { after: performance_testing, optional: true, condition: "unit_testing|qa_testing|security_testing|performance_testing found blocking issues", loopback_to: [unit_testing, qa_testing, security_testing, performance_testing], max_cycles: 1, agent: .claude/agents/bug-fixer.md }
+      code_review: { alias_of: review, note: "uses the standalone reviewer subagent, not the pipeline-stage review.md" }
+      approver: { after: code_review, before: ship, agent: .claude/agents/approver.md }
+      adr: { after: approver, optional: true, condition: "architecture or eng recorded a significant decision", agent: .claude/agents/adr.md }
+      documentation: { after: adr, agent: .claude/agents/doc-writer.md }
+      pr: { after: documentation, terminal: true, agent: .claude/agents/pr-description.md }
+    note: "full_16 stops at pr — ship (merge/tag/push) is a deliberate separate manual step via /ship, not auto-chained"
+
 # Cross-flow gate/commit safety rule, ported here for machine-readability
 # (prose version lives in orchestrator.md section 5).
 commit_gate:
