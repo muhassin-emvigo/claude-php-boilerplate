@@ -7,10 +7,10 @@ mode: plan
 
 # Task size classifier
 
-> Note: this file is read as a prompt by the `/start` orchestrator, not currently
-> registered as an invocable Task-tool subagent. The `model:`/`mode:` fields above
-> document the intended model and behavior for this stage; they do not yet cause
-> automatic routing unless this stage is invoked via the Agent tool.
+> Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
+> fields above do cause real routing when invoked via the Agent tool) — it's also
+> read as a prompt by the `/start` orchestrator when followed inline rather than
+> dispatched as a subagent call.
 >
 > **Operating Mode: Planning.** Emit the classification tags only — never edit files.
 >

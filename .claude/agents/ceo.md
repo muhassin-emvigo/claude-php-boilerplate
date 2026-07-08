@@ -7,11 +7,10 @@ mode: plan
 
 # Agent: CEO
 
-> Note: this file is read as a prompt by the `/start` orchestrator, not currently
-> registered as an invocable Task-tool subagent. The `model:`/`mode:` fields above
-> document the intended model and behavior for this stage; they do not yet cause
-> automatic routing unless this stage is invoked via the Agent tool. Several
-> referenced `claude-mem` plugin is not installed here. `gstack` is the plugin this
+> Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
+> fields above do cause real routing when invoked via the Agent tool) — it's also
+> read as a prompt by the `/start` orchestrator when followed inline. Referenced
+> `claude-mem` plugin is not installed here. `gstack` is the plugin this
 > pipeline actually depends on (for `/office-hours` and `/plan-ceo-review`) and
 > should be installed for those steps to work as written; `superpowers` has been
 > removed from this pipeline entirely — not needed.

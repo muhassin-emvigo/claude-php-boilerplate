@@ -7,14 +7,12 @@ mode: plan
 
 # Agent: Review
 
-> Note: this file is read as a prompt by the `/start` orchestrator, not currently
-> registered as an invocable Task-tool subagent (named `pipeline-review` above to
-> avoid clashing with the real `reviewer` subagent already in this project, which
-> you can invoke directly for a standalone code review). The `model:`/`mode:`
-> fields above document the intended model and behavior for this stage; they do
-> not yet cause automatic routing unless this stage is invoked via the Agent tool.
-> Referenced `gstack`/`security-guidance` plugins are not installed in this
-> environment — use the real `security-auditor` subagent instead.
+> Note: confirmed registered as an invocable Task-tool subagent under the name
+> `pipeline-review` (chosen to avoid clashing with the real `reviewer` subagent
+> already in this project, which you can invoke directly for a standalone code
+> review) — the `model:`/`mode:` fields above do cause real routing when invoked
+> via the Agent tool. Referenced `gstack`/`security-guidance` plugins are not
+> installed in this environment — use the real `security-auditor` subagent instead.
 >
 > **Operating Mode: Planning.** Produce the review checklist and APPROVED/BLOCKED
 > decision only; per this file's own hard rule, only this stage may authorise a

@@ -7,10 +7,9 @@ mode: acceptEdits
 
 # Agent: Eng
 
-> Note: this file is read as a prompt by the `/start` orchestrator, not currently
-> registered as an invocable Task-tool subagent. The `model:`/`mode:` fields above
-> document the intended model and behavior for this stage; they do not yet cause
-> automatic routing unless this stage is invoked via the Agent tool. The referenced
+> Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
+> fields above do cause real routing when invoked via the Agent tool) — it's also
+> read as a prompt by the `/start` orchestrator when followed inline. The referenced
 > `gstack` and `code-review` plugins are not installed in this environment — `gstack`
 > is still needed for the `/plan-eng-review` gate and should be installed; for
 > `code-review`, use the real `code-review` skill/agent already in this project

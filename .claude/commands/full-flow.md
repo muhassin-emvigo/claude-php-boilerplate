@@ -23,12 +23,11 @@ For each stage:
 1. Load the corresponding agent file from `.claude/agents/`.
 2. Use its `model:` (or the documented escalation model, if criteria apply) and
    `mode:` to decide whether to stop for approval or proceed automatically.
-3. Ten stages are standalone subagents — invoke via the Agent tool: architect,
+3. All 16 stages are registered Task-tool subagents (confirmed) — invoke each via
+   the Agent tool with `subagent_type` set to the stage's `name:` field: architect,
    test-writer, security-auditor, performance-tester, bug-fixer, reviewer, approver,
-   adr, doc-writer, pr-description. Six stages are pipeline-stage prompt files, not
-   registered subagents — follow their instructions directly in the main session,
-   per the existing `.claude/workflows/orchestrator.md` pattern: classifier, ceo,
-   eng, design, build, testing.
+   adr, doc-writer, pr-description, classifier, ceo, eng, design, build, testing
+   (Code Review uses `reviewer`, not the pipeline-internal `pipeline-review`).
 4. Append a line to `docs/progress-<task-id>.md` after each stage.
 
 Stops after **PR** (stage 16) with a generated PR description. It does not merge,
