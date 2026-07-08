@@ -2,14 +2,17 @@
 name: classifier
 description: Task size classifier — sizes the task and picks the pipeline tier/branch name, run first on /start
 model: sonnet
+mode: plan
 ---
 
 # Task size classifier
 
 > Note: this file is read as a prompt by the `/start` orchestrator, not currently
-> registered as an invocable Task-tool subagent. The `model:` field above documents
-> the intended model for this stage; it does not yet cause automatic model routing
-> unless this stage is invoked via the Agent tool.
+> registered as an invocable Task-tool subagent. The `model:`/`mode:` fields above
+> document the intended model and behavior for this stage; they do not yet cause
+> automatic routing unless this stage is invoked via the Agent tool.
+>
+> **Operating Mode: Planning.** Emit the classification tags only — never edit files.
 
 Runs immediately on `/start`. Costs ~50 tokens.
 Determines which pipeline tier to activate. Nothing else loads until this completes.
