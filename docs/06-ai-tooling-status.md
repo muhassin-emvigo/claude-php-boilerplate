@@ -3,21 +3,31 @@
 A plain record of what's actually installed and working vs. what's referenced but
 not set up, so nobody re-discovers this the hard way.
 
-## gstack — NOT installed
+## gstack — NOT installed, but needed
 
 Several files in `.claude/agents/` (`ceo.md`, `design.md`, `eng.md`, `review.md`,
 `ship.md`) reference `gstack` plugin commands: `/office-hours`, `/plan-ceo-review`,
-`/plan-design-review`, `/plan-eng-review`, `/ship`.
+`/plan-design-review`, `/plan-eng-review`, `/ship`. Unlike `superpowers` (removed,
+see below), this one is intentionally kept — it's the plugin this pipeline actually
+depends on.
 
 **Confirmed status:** `gstack` is not on this machine's PATH and is not installed as
 a global npm package. If you invoke a pipeline stage that calls a `gstack` command,
-that step will not run as written — treat those instructions as aspirational until
-gstack is actually installed and configured.
+that step will not run as written until it's actually installed and configured.
 
 **What still works without it:** every stage's core responsibilities (producing a
 brief, a spec, a design doc, running review, etc.) — the `gstack` commands are
 structured wrappers around behavior an agent can still do directly by following the
 rest of the file's instructions.
+
+## superpowers — removed from the pipeline
+
+Previously referenced in `ceo.md`, `eng.md`, `build.md`, `testing.md`, and `ship.md`
+for `/brainstorm`, `/write-plan`, `/execute-plan`, and `/wrapup`. Determined not
+needed — every agent file now does that work directly (enumerate approaches, write
+the spec, implement, write the retrospective) without depending on the plugin. If
+you see a `superpowers` mention left in an agent file, it's only an explanatory
+note about the removal, not a live dependency.
 
 ## claude-mem — NOT installed
 

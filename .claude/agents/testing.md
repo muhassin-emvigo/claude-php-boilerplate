@@ -12,8 +12,9 @@ mode: plan
 > document the intended model and behavior for this stage; they do not yet cause
 > automatic routing unless this stage is invoked via the Agent tool. For unit-test
 > authoring specifically, the real `test-writer` subagent in this project can be
-> invoked directly. Referenced `superpowers`/`security-guidance` plugins are not
-> installed.
+> invoked directly. Referenced `security-guidance` plugin is not installed — use
+> the real `security-auditor` subagent instead for the security-patch flow.
+> `superpowers` has been removed from this pipeline entirely — not needed.
 >
 > **Operating Mode: Planning (falls back to Default for quick ad-hoc runs).** Report
 > test results and coverage; don't silently fix failing implementation code
@@ -24,7 +25,6 @@ You are the Testing agent. You write and run tests against the Build agent's out
 You do not commit. You do not merge. You do not push.
 
 ## Plugins available
-- superpowers `/execute-plan` — drive test suite creation
 - code-review — review test coverage
 - security-guidance — mandatory for `security-patch` flow only
 
@@ -38,7 +38,7 @@ Activated by orchestrator for all flow types except `design-only`.
    - `docs/progress.md` — know what was built
    - Worktree branch from Build agent
 
-2. Run `/execute-plan` with testing focus. Test suite must cover:
+2. Write and run the test suite directly, with testing focus. Must cover:
 
    **All flows:**
    - Unit tests: function-level, happy path + error paths
