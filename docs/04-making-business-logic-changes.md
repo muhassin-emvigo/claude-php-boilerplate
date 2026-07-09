@@ -25,6 +25,17 @@ Typical places to add logic inside `app/code/vendor/CustomShipping/`:
 | `Observer/` | Code that reacts to Magento "events" (e.g. "order placed") |
 | `etc/` | Configuration XML files (already has `module.xml`) |
 
+> **Want to see this pattern used for real, not just as a placeholder?** `CustomShipping` above is an
+> empty starter skeleton. `app/code/vendor/Rgd/Inventory/` (module name `Rgd_Inventory`) is a fully
+> built module in this same codebase that uses every folder in the table above plus a few more
+> (`Ui/` for admin grid/form components, `Test/Unit/` for unit tests) — it implements FEFO batch
+> inventory tracking for the pharmacy. Its own [README.md](../app/code/vendor/Rgd/Inventory/README.md)
+> documents the service contracts, database schema, admin UI, and known limitations in detail, and
+> [docs/adr/1-fefo-batch-inventory-architecture.md](adr/1-fefo-batch-inventory-architecture.md) records
+> the architectural decisions (and a real bug that was caught and fixed) behind how it's wired into
+> Magento's core deduction path via a plugin. Worth a skim before starting a similarly-sized change of
+> your own.
+
 ## Step-by-step: making a change
 
 1. **Edit or add a PHP file** under `app/code/vendor/CustomShipping/`.

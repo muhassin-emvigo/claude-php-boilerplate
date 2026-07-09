@@ -4,7 +4,11 @@
 
 The `Rgd_Inventory` module implements batch-based inventory management with First Expiry, First Out (FEFO) ordering for the RGD Dental clinic. It allows tracking of multiple batches per SKU with individual expiry dates and quantities, automatically selecting the batch with the earliest expiry date when dispensing stock.
 
-**Status:** Phase 1 — Core deduction logic and audit trail implemented. Phase 2 (return/restoration logic) deferred.
+**Status:** Phase 1 shipped (commit `c50dfb0`, branch `feature/fefo-batch-inventory`) — FEFO deduction,
+audit ledger, and admin CRUD UI are live. Phase 2 (returns/restoration, CSV import) is deferred; see
+[Known limitations (Phase 1)](#known-limitations-phase-1) below and
+[docs/adr/1-fefo-batch-inventory-architecture.md](../../../../../docs/adr/1-fefo-batch-inventory-architecture.md) for the architectural
+decisions behind the split.
 
 ---
 
@@ -165,14 +169,24 @@ interface BatchDeductionServiceInterface
 }
 ```
 
-**Behavior:**
+**Behavior (standalone call via the public `deduct()` method):**
 1. Acquires `SELECT ... FOR UPDATE` lock on candidate batches
 2. Computes FEFO allocation against locked rows
 3. Updates `remaining_qty` for each allocated batch
 4. Writes `movement_type=deduction` audit rows
 5. Commits (or rolls back on error)
 
-The plugin (SourceDeductionCoordinator) manages a shared transaction that wraps both batch deduction and MSI's original `proceed()` call, ensuring atomicity between the batch ledger and MSI's source_item decrement.
+`deduct()` is a fully self-contained, single-item, single-transaction operation — the right entry point
+for any future caller outside the checkout plugin (e.g. manual admin adjustment tooling).
+
+The concrete `Rgd\Inventory\Model\BatchDeductionService` class additionally exposes a
+`deductWithinTransaction(..., AdapterInterface $connection, ?int $orderId)` method that performs the
+same allocate/update/audit-write work but takes an **externally supplied, already-open** connection and
+does not begin/commit/roll back anything itself. This method is intentionally **not** part of the
+`@api` interface — it is transaction plumbing consumed only by `SourceDeductionCoordinator` (see Plugin
+Integration below), which needs to keep one transaction open across several items *and* MSI's own
+`proceed()` call. `deduct()` itself calls `deductWithinTransaction()` internally, wrapped in its own
+transaction, so the two entry points share one allocation implementation.
 
 **Error Handling:**
 - `LocalizedException RGD_INV_INSUFFICIENT_STOCK` — Insufficient or all-expired stock
@@ -201,21 +215,40 @@ Currently returns `[]` (no-op). Phase 2 will reverse audited deductions using tr
 
 ## Plugin Integration
 
-### `SourceDeductionServicePlugin`
+### `SourceDeductionServicePlugin` + `SourceDeductionCoordinator`
 
-Intercepts `Magento\InventorySourceDeductionApi\Model\SourceDeductionServiceInterface::execute()` to inject batch-level deduction tracking.
+The plugin (`Rgd\Inventory\Plugin\InventorySourceDeduction\SourceDeductionServicePlugin`) intercepts
+`Magento\InventorySourceDeductionApi\Model\SourceDeductionServiceInterface::execute()` as an **around**
+plugin, but it does no work itself — it immediately delegates to
+`Rgd\Inventory\Model\SourceDeductionCoordinator::executeWithBatchTracking()`, which owns the actual
+transaction lifecycle.
 
-**Flow:**
-1. Plugin receives MSI's `SourceDeductionRequest` (items, sales event, source)
-2. Resolves `order_item_id` for each item via `OrderItemRepositoryInterface`
-3. Delegates to `BatchDeductionService::deduct()` for each item
-4. Calls original `proceed()` to execute MSI's native deduction
-5. Returns control to caller
+> **Note:** `SourceDeductionCoordinator` is a package-private orchestration class, deliberately **not**
+> part of the `Api/` contracts (see ADR-1, Decision 3). It exists specifically to hold the transaction
+> open across multiple items *and* MSI's own `proceed()` call — something `BatchDeductionServiceInterface::deduct()`
+> cannot do on its own, since `deduct()`'s public contract is a self-contained, already-committed
+> single-item operation for standalone callers.
+
+**Flow (one shared transaction for the whole request):**
+1. Plugin receives MSI's `SourceDeductionRequest` (items, sales event, source) and hands it straight to the coordinator.
+2. Coordinator resolves `order_item_id` for **all** items in a single batched `OrderItemRepositoryInterface::getList()` call (not one query per item — see Performance history below), keyed by order id + SKU list.
+3. Coordinator opens **one** database transaction (`beginTransaction()`).
+4. For each item, the coordinator calls `BatchDeductionService::deductWithinTransaction()` — the non-transactional allocation/lock/ledger-write logic — reusing the same connection/transaction for every item.
+5. Once all items have been deducted, the coordinator invokes the original `$proceed($sourceDeductionRequest)` **inside the still-open transaction**, letting MSI run its native `source_item` decrement and event dispatch.
+6. Coordinator commits. Any exception at any step (order-item resolution, any item's allocation, or `proceed()` itself) rolls back the entire transaction — our batch ledger and MSI's `source_item` aggregate always commit or roll back together.
+
+> **Important — corrected design, do not regress.** An earlier build had each item's batch deduction
+> commit independently before `proceed()` ran. Security Testing flagged this HIGH: if `proceed()` (or a
+> later item) then failed, the batch ledger was already committed while MSI's aggregate was not, leaving
+> the two stores permanently out of sync with no rollback — unacceptable in a pharmacy context. This was
+> fixed by introducing the coordinator and the single shared transaction described above. See
+> [docs/adr/1-fefo-batch-inventory-architecture.md](../../../../../docs/adr/1-fefo-batch-inventory-architecture.md), Decision 3, for the full rationale. Anyone refactoring this plugin/coordinator
+> must preserve the "`proceed()` runs inside our transaction" invariant.
 
 **Concurrency:**
-- Each batch deduction opens/closes its own transaction (phase 1 pragmatic limitation)
-- Lock is `SELECT ... FOR UPDATE` with deterministic `ORDER BY` to prevent deadlock
-- Stable lock acquisition order: `ORDER BY expiry_date IS NULL, expiry_date ASC, batch_id ASC`
+- Lock is `SELECT ... FOR UPDATE` with deterministic `ORDER BY` per SKU to prevent deadlock between two transactions deducting the *same* SKU.
+- Stable lock acquisition order: `ORDER BY expiry_date IS NULL, expiry_date ASC, batch_id ASC` (the `batch_id ASC` tie-breaker is load-bearing, not cosmetic — remove it and concurrent checkouts can lock the same rows in different orders and deadlock instead of one blocking on the other).
+- Residual risk (documented, accepted, not fixed): items *within* a single multi-item cart are locked in the order MSI supplied them, which is not guaranteed to be the same order across two different requests sharing overlapping SKUs (e.g. order A = [SKU-1, SKU-2], order B = [SKU-2, SKU-1]). InnoDB's deadlock detector resolves this by aborting one transaction, which then retries via Magento's normal checkout retry path. A single globally-ordered lock query across all items would close this gap but was judged a larger redesign than warranted for phase 1.
 
 ---
 
@@ -259,44 +292,148 @@ FOR UPDATE
 
 ## Admin UI
 
-### Batch Listing Grid (`Catalog > Batch Inventory`)
+Phase 1 ships a standard Magento UI Components grid + form (no CSV import, no custom grid JS) for
+clinic staff to manage batch intake and corrections directly.
 
-Displays all batches with:
-- **Columns:** ID, SKU, Batch Number, Expiry Date, Received Qty, Remaining Qty, Source, Status, Created At
-- **Filters:** SKU (text), Batch Number (text), Expiry Date (date range), Remaining Qty (numeric range), Status (active/inactive)
-- **Sorting:** All columns sortable
-- **Bulk Actions:** Activate, Deactivate (hard delete intentionally not offered as bulk action per spec)
-- **Row Actions:** Edit, Delete (delete disabled/hidden if batch has transaction history)
+### Finding the Batch grid
 
-### Batch Create/Edit Form
+**Menu path:** **Catalog > Inventory > Batch Inventory**
+(the menu item is registered under `Magento_Catalog::catalog_inventory`, i.e. it sits alongside the
+core "Products" and "Categories" items in the Catalog menu, not as a new top-level group).
 
-Create or edit batch inventory with:
-- **Fields:**
-  - SKU (required, read-only on edit — identity field)
-  - Batch Number (required, read-only on edit — identity field)
-  - Source Code (required, read-only on edit, default = 'default')
-  - Expiry Date (required, date picker)
-  - Received Qty (required, positive number — immutable on edit)
-  - Remaining Qty (required on edit only; on create, auto-set to Received Qty)
-  - Status (Active checkbox, default checked)
-- **On Create:** Intake transaction row written with `movement_type=intake`, `qty=received_qty`
-- **On Edit:** If remaining_qty changed, adjustment transaction row written with signed delta
+Direct admin URL: `<admin>/rgd_inventory/batch/index`
 
-## Limitations & Future Work
+**Who can see it:** access is controlled by two ACL resources, nested under **Catalog > Batch Inventory**
+in the admin **System > Permissions > User Roles** resource tree (a separate place from the menu path
+above — this is where an admin grants/revokes access per role):
+- `Rgd_Inventory::batch` — required to open the grid at all (`Index` controller's `ADMIN_RESOURCE`)
+- `Rgd_Inventory::batch_manage` — required to open the create/edit form or use Delete (`Edit`, `Save`,
+  `Delete` controllers)
 
-### Phase 1 (Current)
+  > **Note:** `etc/acl.xml` also declares a third resource, `Rgd_Inventory::batch_view`, intended for a
+  > future read-only staff role. No controller currently checks it — it is reserved/unused in phase 1,
+  > not a bug, but don't expect assigning only `batch_view` to grant grid access today; use `batch` for that.
 
-- Deduction with batch tracking and FEFO ordering
-- Audit trail recording all movements
-- Admin CRUD for batch intake with form-driven transaction recording
-- Hard-delete guard: batches with transaction history cannot be deleted (soft-deactivation is the removal path)
+### Batch listing grid
 
-### Phase 2 (Deferred)
+Columns: ID, SKU, Batch Number, Expiry Date, Received Qty, Remaining Qty, Source, Status, Created At — all
+sortable. Filters: SKU (text), Batch Number (text), Expiry Date (date range), Received Qty (numeric
+range), Remaining Qty (numeric range), Source (select), Status (Active/Inactive).
 
-- `BatchReturnServiceInterface` implementation (creditmemo-driven restoration)
-- CSV import/export of batches
-- Batch-level reporting/analytics dashboard
-- Hard expiry_date requirement at DB layer (currently optional in schema)
+Row actions: **Edit** and **Delete** (see delete-guard behavior below). There is no bulk/mass-action
+delete in phase 1 — batches are deleted one at a time deliberately, so the delete-guard's per-row error
+message is always seen rather than silently skipped in a bulk operation.
+
+### Creating a new batch (intake)
+
+1. From the grid, click **Add New Batch**.
+2. Fill in SKU, Batch Number, Source (defaults to `default`), Expiry Date, and Received Qty.
+3. Click **Save Batch**.
+
+On create, the controller (`Rgd\Inventory\Controller\Adminhtml\Batch\Save`) sets `remaining_qty` equal
+to the entered `received_qty` and writes a `rgd_inventory_batch_transaction` row with
+`movement_type=intake`, `qty=+received_qty`, `reference="Manual intake"`. This means every batch's stock
+— even stock that was never touched by a sale — has a traceable origin row in the ledger from the moment
+it's created; there is no bare `INSERT` into the batch table that bypasses the audit trail.
+
+> **Validation note:** the SKU field is a plain text input in phase 1 (no product autocomplete), but the
+> repository's `save()` does **not** currently verify the SKU exists in the catalog before persisting the
+> batch — a typo'd SKU will silently create a batch the FEFO selector will never match against any real
+> order (since order items carry the real SKU). Double-check the SKU against the product grid before
+> saving; this is a known gap, not by-design behavior worth relying on.
+
+### Editing a batch, and how remaining-quantity edits become an audit adjustment
+
+SKU, Batch Number, and Source are treated as the batch's identity (matching the unique key
+`sku` + `batch_number` + `source_code`). The edit form currently renders these as regular (not
+visually disabled) inputs, but **the Save controller silently discards any change to them on edit** —
+`Save::prepareExistingBatch()` unsets `sku`, `batch_number`, and `source_code` from the posted data
+before applying it, so editing those fields in the browser has no effect once you hit Save. To change a
+batch's identity, delete it (if it has no transaction history) and recreate it, or deactivate it and
+create a new batch under the corrected identity.
+
+**Received Qty** is also effectively immutable on edit for the same reason — it's part of the posted
+data, but nothing in the edit flow is expected to change it meaningfully after intake; treat it as a
+historical record of what was received.
+
+**Remaining Qty**, however, is genuinely editable on the edit form — this is the mechanism for manual
+stock corrections (stock takes, damage write-offs, found stock). When you save an edit where
+`remaining_qty` differs from its previous value, the Save controller computes the signed delta
+(`new − old`) and writes a second `rgd_inventory_batch_transaction` row with `movement_type=adjustment`,
+`qty=<signed delta>`, `reference="Manual adjustment"` — in addition to updating the batch row itself.
+This is what keeps manual admin corrections traceable in the same ledger the FEFO deduction and intake
+flows write to, rather than being an invisible `UPDATE` with no history. If `remaining_qty` is unchanged
+on save, no adjustment row is written.
+
+Server-side validation (in `BatchRepository::save()`) still enforces `0 <= remaining_qty <= received_qty`
+and rejects a negative `received_qty`, regardless of what the client-side form validation already checks.
+
+### Delete-guard behavior — why some Delete actions are refused
+
+Clicking **Delete** on a grid row or the edit form's Delete button asks for confirmation, then posts to
+`rgd_inventory/batch/delete`. The repository's `deleteById()` first checks whether any
+`rgd_inventory_batch_transaction` rows reference that `batch_id`:
+
+- **No transaction history** (e.g. a batch created by mistake and never used) — the batch row is deleted
+  outright and a success message is shown.
+- **Any transaction history exists** (intake, deduction, adjustment, or return rows) — the delete is
+  **refused**. The controller catches `CouldNotDeleteException` and surfaces the message
+  *"Cannot delete batch "%1": it has recorded inventory transactions. Deactivate it instead."* via the
+  standard admin error-message banner. The batch row is left untouched.
+
+This is a deliberate application-layer guard, not a database limitation — the underlying foreign key
+(`rgd_inventory_batch_transaction.batch_id → rgd_inventory_batch.batch_id`) is actually configured
+`ON DELETE CASCADE` as a defense-in-depth safety net against orphaned rows, but the repository is
+expected to never let that cascade fire in normal operation, because doing so would silently destroy
+audit history that exists specifically for pharmacy compliance/traceability. **The correct way to retire
+a batch that has history is to deactivate it**, not delete it:
+
+1. Open the batch's Edit form (or use the grid's Activate/Deactivate mass action).
+2. Uncheck **Active** (`is_active`) and save — no adjustment row is written for this, since it doesn't
+   change `remaining_qty`, only visibility to the FEFO selector.
+3. A deactivated batch (`is_active = 0`) is excluded from `FefoBatchSelectorInterface::selectForDeduction()`
+   and `BatchDeductionService`'s locked candidate query, so it will never be drawn from again, while its
+   full transaction history remains intact and queryable.
+
+## Known limitations (Phase 1)
+
+These are deliberate, documented scope cuts from the approved spec/ADR — not oversights — but anyone
+building on top of this module should know about them up front:
+
+- **Returns/restore is a stubbed no-op.** `BatchReturnServiceInterface::restore()` is implemented by
+  `Rgd\Inventory\Model\BatchReturnService` and simply returns `[]` without touching the database. The
+  contract (signature, docblock) is locked and designed so a phase 2 implementation is a drop-in — it's
+  meant to reconstruct which batch(es) a quantity was originally deducted from via the
+  `rgd_inventory_batch_transaction` ledger (matched by `order_item_id`, `movement_type=deduction`,
+  walked oldest-first up to the returned qty) — but **no such logic exists yet**. Practically: creditmemos
+  and order cancellations do **not** restore quantity to `rgd_inventory_batch.remaining_qty` or write a
+  `return` ledger row in phase 1. MSI's own `source_item` quantity may still be restored natively by MSI
+  itself outside this module's control — this module's batch-level ledger simply doesn't participate in
+  that restoration yet. See ADR-1, Decision 4.
+- **No CSV import for batch intake.** All batch creation goes through the admin form, one batch at a
+  time. This is also *why* `expiry_date` is nullable at the database level even though the admin form
+  requires it — the schema was deliberately left import-friendly so a future CSV importer (which might
+  encounter rows with unknown expiry dates) doesn't require a schema migration. Do not tighten
+  `expiry_date` to `NOT NULL` at the DB layer without accounting for this.
+- **Single-source design (`source_code = 'default'`).** The schema and FEFO selector are fully
+  source-code-aware (it's part of the unique key and every query), so multi-source deployments are not
+  architecturally blocked — but phase 1 was built and tested against a single-source pharmacy deployment.
+  The admin form's Source dropdown currently only offers `default`. Multi-source behavior (e.g. FEFO
+  allocation per-source vs. across sources) has not been scenario-tested.
+- **No SKU-exists validation on batch save.** See the intake note above — a mistyped SKU will silently
+  create an orphaned batch.
+- **No product-name column / no CSV export / no dedicated "expiring soon" dashboard.** The grid's Expiry
+  Date range filter covers the spec's reporting requirement; anything beyond that (e.g. a widget) was
+  explicitly out of scope for phase 1.
+
+### Phase 2 (deferred, contracts already locked so this is additive work)
+
+- Implement `BatchReturnServiceInterface::restore()` against the audit trail; wire it into the
+  creditmemo/cancel flow.
+- CSV batch import/export.
+- Batch-level reporting/analytics dashboard.
+- Revisit whether `expiry_date` should be hard-required at the DB layer once CSV import's behavior for
+  unknown-expiry rows is decided.
 
 ---
 
@@ -333,8 +470,10 @@ Routes:
 - Delete endpoint: `/admin/rgd_inventory/batch/delete` (POST)
 
 Menu:
-- Location: **Catalog > Batch Inventory**
-- ACL: `Rgd_Inventory::batch` (view), `Rgd_Inventory::batch_manage` (edit/delete)
+- Location: **Catalog > Inventory > Batch Inventory** (registered under `Magento_Catalog::catalog_inventory`)
+- ACL: `Rgd_Inventory::batch` (grid view), `Rgd_Inventory::batch_manage` (create/edit/delete). A third
+  resource, `Rgd_Inventory::batch_view`, is declared in `etc/acl.xml` for a future read-only role but is
+  not currently checked by any controller.
 
 ---
 
@@ -391,12 +530,24 @@ Menu:
 
 ---
 
-## Testing Strategy (Phase Next)
+## Testing
 
-- **Unit tests:** Mock dependencies, test FEFO logic, error conditions
-- **Integration tests:** Full flow from order to shipment with real DB
-- **Concurrency tests:** Multiple simultaneous orders against same batch
-- **Edge cases:** Partial allocations, expired batches, zero-qty batches
+**Shipped test coverage:** `Test/Unit/Model/` contains 37 passing unit tests across
+`BatchDeductionServiceTest`, `BatchRepositoryTest`, `FefoBatchSelectorTest`, and
+`SourceDeductionCoordinatorTest` — covering FEFO allocation ordering, the three distinct
+insufficient-stock/expired/unconfigured error paths, save() validation, the delete-guard, and the
+coordinator's shared-transaction/rollback behavior (mocked connection).
+
+In addition to the unit suite, this module went through a real-MySQL scenario-verification pass
+(11/11 checks; see [docs/qa-scenario-verification-batch-based-inventory-management.md](../../../../../docs/qa-scenario-verification-batch-based-inventory-management.md) in the
+main project) covering end-to-end deduction across multiple batches, expiry exclusion, the
+transaction-atomicity fix, and the delete-guard against a live database — not just mocks.
+
+`Test/Integration/` currently only holds a `.gitkeep` placeholder — no Magento integration-test-framework
+tests (`Magento\TestFramework\TestCase\...` against a bootstrapped Magento app) exist yet. The real-DB
+verification above was done via a standalone scenario script, not the integration test framework;
+adding proper integration tests here (in particular a true concurrency test with two overlapping
+transactions) is recommended future work, not something already covered.
 
 ---
 
@@ -404,4 +555,4 @@ Menu:
 
 | Version | Date | Notes |
 |---------|------|-------|
-| 1.0.0 | 2026-07-08 | Phase 1 release: deduction with FEFO ordering, audit trail, hard-delete guard |
+| 1.0.0 | 2026-07-09 | Phase 1 shipped (commit `c50dfb0`, branch `feature/fefo-batch-inventory`): FEFO deduction with pessimistic locking, append-only audit ledger, admin CRUD (grid + form) with intake/adjustment ledger writes and delete-guard, `BatchReturnServiceInterface` defined as a locked-but-stubbed phase 2 contract. Preceded by 6 rounds of bug-fixing (see [docs/progress-batch-based-inventory-management.md](../../../../../docs/progress-batch-based-inventory-management.md) in the main project) that corrected, among other things, a HIGH-severity transaction-atomicity bug (each item originally committed its own batch deduction independently of MSI's `proceed()` — fixed via `SourceDeductionCoordinator`'s shared transaction), the expiry cutoff operator (`>` not `>=`, so a batch expiring today is excluded), and `order_id` not being persisted to the ledger. |
