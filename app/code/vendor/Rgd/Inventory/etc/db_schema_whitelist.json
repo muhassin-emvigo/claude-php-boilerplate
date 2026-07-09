@@ -1,0 +1,57 @@
+{
+    "rgd_inventory_batch": {
+        "column": {
+            "batch_id": true,
+            "sku": true,
+            "batch_number": true,
+            "expiry_date": true,
+            "received_qty": true,
+            "remaining_qty": true,
+            "source_code": true,
+            "is_active": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "RGD_INVENTORY_BATCH_SKU_EXPIRY_DATE_REMAINING_QTY": true,
+            "RGD_INVENTORY_BATCH_EXPIRY_DATE": true,
+            "RGD_INVENTORY_BATCH_BATCH_NUMBER": true,
+            "RGD_INVENTORY_BATCH_SKU_SOURCE_CODE_EXPIRY_DATE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_INVENTORY_BATCH_SKU_BATCH_NUMBER_SOURCE_CODE": true
+        }
+    },
+    "rgd_inventory_batch_transaction": {
+        "column": {
+            "transaction_id": true,
+            "batch_id": true,
+            "sku": true,
+            "batch_number": true,
+            "expiry_date": true,
+            "movement_type": true,
+            "qty": true,
+            "sales_event_type": true,
+            "order_id": true,
+            "order_item_id": true,
+            "reference": true,
+            "created_at": true
+        },
+        "index": {
+            "RGD_INV_BATCH_TXN_SKU_CREATED_AT": true,
+            "RGD_INV_BATCH_TXN_ORDER_ITEM_ID": true,
+            "RGD_INV_BATCH_TXN_BATCH_ID": true,
+            "RGD_INVENTORY_BATCH_TRANSACTION_SKU_CREATED_AT": true,
+            "RGD_INVENTORY_BATCH_TRANSACTION_ORDER_ITEM_ID": true,
+            "RGD_INVENTORY_BATCH_TRANSACTION_BATCH_ID": true,
+            "RGD_INVENTORY_BATCH_TRANSACTION_BATCH_NUMBER": true,
+            "RGD_INVENTORY_BATCH_TRANSACTION_EXPIRY_DATE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_INV_BATCH_TXN_BATCH_ID_RGD_INV_BATCH_BATCH_ID": true,
+            "RGD_INV_BATCH_TRANSACTION_BATCH_ID_RGD_INV_BATCH_BATCH_ID": true
+        }
+    }
+}

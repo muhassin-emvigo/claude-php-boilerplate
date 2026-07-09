@@ -9,17 +9,21 @@
     <testsuites>
         <testsuite name="Unit Tests">
             <directory suffix="Test.php">app/code/vendor/CustomShipping/Test/Unit</directory>
+            <directory suffix="Test.php">app/code/vendor/Rgd/Inventory/Test/Unit</directory>
         </testsuite>
         <testsuite name="Integration Tests">
             <directory suffix="Test.php">app/code/vendor/CustomShipping/Test/Integration</directory>
+            <directory suffix="Test.php">app/code/vendor/Rgd/Inventory/Test/Integration</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
             <directory suffix=".php">app/code/vendor/CustomShipping</directory>
+            <directory suffix=".php">app/code/vendor/Rgd/Inventory</directory>
         </include>
         <exclude>
             <directory>app/code/vendor/CustomShipping/Test</directory>
+            <directory>app/code/vendor/Rgd/Inventory/Test</directory>
         </exclude>
     </source>
 </phpunit>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- API Preferences -->
+    <preference for="Rgd\Inventory\Api\BatchRepositoryInterface" type="Rgd\Inventory\Model\BatchRepository"/>
+    <preference for="Rgd\Inventory\Api\FefoBatchSelectorInterface" type="Rgd\Inventory\Model\FefoBatchSelector"/>
+    <preference for="Rgd\Inventory\Api\BatchDeductionServiceInterface" type="Rgd\Inventory\Model\BatchDeductionService"/>
+    <preference for="Rgd\Inventory\Api\BatchReturnServiceInterface" type="Rgd\Inventory\Model\BatchReturnService"/>
+    <preference for="Rgd\Inventory\Api\Data\BatchInterface" type="Rgd\Inventory\Model\Data\Batch"/>
+    <preference for="Rgd\Inventory\Api\Data\BatchTransactionInterface" type="Rgd\Inventory\Model\Data\BatchTransaction"/>
+    <preference for="Rgd\Inventory\Api\Data\BatchSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+
+    <!-- Plugin on SourceDeductionServiceInterface -->
+    <type name="Magento\InventorySourceDeductionApi\Model\SourceDeductionServiceInterface">
+        <plugin name="rgd_inventory_source_deduction" type="Rgd\Inventory\Plugin\InventorySourceDeduction\SourceDeductionServicePlugin" sortOrder="10"/>
+    </type>
+
+    <!-- Data Provider for Batch Form -->
+    <virtualType name="RgdInventoryBatchFormDataProvider" type="Rgd\Inventory\Ui\DataProvider\BatchDataProvider">
+        <arguments>
+            <argument name="collectionFactory" xsi:type="object">Rgd\Inventory\Model\ResourceModel\Batch\CollectionFactory</argument>
+            <argument name="name" xsi:type="string">rgd_inventory_batch_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">batch_id</argument>
+            <argument name="requestFieldName" xsi:type="string">batch_id</argument>
+        </arguments>
+    </virtualType>
+
+</config>

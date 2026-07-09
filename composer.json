@@ -21,6 +21,7 @@
     "autoload": {
         "psr-4": {
             "vendor\\CustomShipping\\": "app/code/vendor/CustomShipping/",
+            "Rgd\\Inventory\\": "app/code/vendor/Rgd/Inventory/",
             "Magento\\Setup\\": "setup/src/Magento/Setup/",
             "Zend\\Mvc\\Controller\\": "setup/src/Zend/Mvc/Controller/"
         },
@@ -32,17 +33,19 @@
         },
         "files": [
             "app/code/vendor/CustomShipping/registration.php",
+            "app/code/vendor/Rgd/Inventory/registration.php",
             "app/etc/NonComposerComponentRegistration.php"
         ],
         "exclude-from-classmap": [
             "**/dev/**",
             "**/update/**",
-            "**/Test/**"
+            "app/code/**/Test/**"
         ]
     },
     "autoload-dev": {
         "psr-4": {
-            "vendor\\CustomShipping\\Test\\": "app/code/vendor/CustomShipping/Test/"
+            "vendor\\CustomShipping\\Test\\": "app/code/vendor/CustomShipping/Test/",
+            "Rgd\\Inventory\\Test\\": "app/code/vendor/Rgd/Inventory/Test/"
         }
     },
     "scripts": {
