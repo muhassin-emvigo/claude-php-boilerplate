@@ -220,6 +220,15 @@ if (-not (Test-Path 'app/etc/env.php')) {
     php bin/magento setup:upgrade --no-interaction
 }
 
+Say 'Disabling Magento_ReCaptchaUser (no reCAPTCHA API keys configured for local dev)'
+# Without Google reCAPTCHA keys, this module's admin-login observer throws
+# "Cannot instantiate interface Magento\ReCaptchaUi\Model\ErrorMessageConfigInterface"
+# on every login attempt, silently blocking ALL admin access (no error shown to
+# the user, no failure recorded in admin_user - the login form just redisplays
+# itself). This is unrelated to any custom module; it's a gap in this Magento
+# version's ReCaptcha DI wiring when the feature isn't configured.
+php bin/magento module:disable Magento_ReCaptchaUser 2>$null
+
 Say 'Enabling module and finishing setup'
 php bin/magento module:enable $moduleId 2>$null
 php bin/magento setup:upgrade --no-interaction

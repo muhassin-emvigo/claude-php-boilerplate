@@ -3,7 +3,7 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="Magento_Backend::catalog" title="Catalog" translate="title">
+                <resource id="Magento_Catalog::catalog" title="Catalog" translate="title">
                     <resource id="Rgd_Inventory::batch" title="Batch Inventory" translate="title">
                         <resource id="Rgd_Inventory::batch_view" title="View" translate="title"/>
                         <resource id="Rgd_Inventory::batch_manage" title="Manage" translate="title"/>
