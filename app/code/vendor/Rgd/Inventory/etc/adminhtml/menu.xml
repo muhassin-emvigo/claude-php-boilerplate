@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="Rgd_Inventory::batch" title="Batch Inventory" module="Rgd_Inventory" sortOrder="50" action="rgd_inventory/batch/index" resource="Rgd_Inventory::batch" parent="Magento_Catalog::catalog_inventory"/>
+        <add id="Rgd_Inventory::batch" title="Batch Inventory" module="Rgd_Inventory" sortOrder="50" action="rgd_inventory/batch/index" resource="Rgd_Inventory::batch" parent="Magento_Catalog::inventory"/>
     </menu>
 </config>
