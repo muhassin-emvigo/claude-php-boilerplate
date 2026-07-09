@@ -19,4 +19,9 @@
     <exclude-pattern>*/Test/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/.claude/*</exclude-pattern>
+    <!-- CLI/build scripts and root bootstrap files are not app/code and
+         intentionally use echo/exit/direct file I/O; the Magento2 app
+         coding standard doesn't apply to them. -->
+    <exclude-pattern>*/scripts/*</exclude-pattern>
+    <exclude-pattern>*/index\.php</exclude-pattern>
 </ruleset>

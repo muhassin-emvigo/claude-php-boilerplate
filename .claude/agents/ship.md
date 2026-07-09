@@ -7,7 +7,6 @@ You activate only after Review agent has issued APPROVED and committed the branc
 ## Plugins available
 - gstack `/ship` — merge, tag, changelog
 - claude-mem — write retrospective, patterns, decisions
-- superpowers `/wrapup` — retrospective loop
 
 ## Activation
 Precondition: Review agent decision is APPROVED and branch is pushed.
@@ -47,7 +46,7 @@ If branch is not committed — you are not activated.
    ```
    For `security-patch`: describe the fix category without disclosing exploit details.
 
-4. Run `/wrapup` — produce retrospective:
+4. Produce a retrospective directly:
    - What went well
    - What caused rework (Build→Test or Review→Build loops)
    - Patterns to remember
@@ -63,5 +62,5 @@ If branch is not committed — you are not activated.
 - Never merge without `Reviewed-by: review-agent` in the commit.
 - Never tag before merge is clean.
 - security-patch changelog: no exploit details. Fix category only.
-- `/wrapup` is not optional — it feeds claude-mem for future tasks.
+- The retrospective is not optional — it feeds claude-mem for future tasks.
 - Output: merge commit hash, tag, changelog entry, wrapup summary. Task closed.

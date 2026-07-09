@@ -14,7 +14,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "vendor/bin/phpcs --standard=phpcs.xml.dist {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": "php vendor/bin/phpcs --standard=phpcs.xml.dist {$STAGED_FILES|of-type:php|separated-by: }",
                 "conditions": [
                     {
                         "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",
@@ -23,7 +23,7 @@
                 ]
             },
             {
-                "action": "vendor/bin/phpstan analyse --no-progress {$STAGED_FILES|of-type:php|separated-by: }",
+                "action": "php vendor/bin/phpstan analyse --no-progress {$STAGED_FILES|of-type:php|separated-by: }",
                 "conditions": [
                     {
                         "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileStaged\\OfType",
@@ -37,7 +37,7 @@
         "enabled": true,
         "actions": [
             {
-                "action": "vendor/bin/phpunit -c phpunit.xml.dist --testsuite 'Unit Tests'"
+                "action": "php vendor/bin/phpunit -c phpunit.xml.dist --testsuite \"Unit Tests\""
             }
         ]
     },

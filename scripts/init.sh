@@ -70,6 +70,16 @@ find . -type f \
     -not -path './vendor/*' \
     -not -path './node_modules/*' \
     -not -path './scripts/init.sh' \
+    -not -name 'Makefile' \
+    -not -name 'make.ps1' \
+    -not -name 'composer.json' \
+    -not -name 'composer.lock' \
+    -not -name 'phpunit.xml.dist' \
+    -not -name 'captainhook.json' \
+    -not -name '.gitignore' \
+    -not -name 'phpcs.xml.dist' \
+    -not -name 'phpstan.neon.dist' \
+    -not -path './docker/nginx/*' \
     -not -name '*.png' -not -name '*.jpg' -not -name '*.gif' \
     -print0 | while IFS= read -r -d '' file; do
     if file "$file" | grep -q 'text'; then
@@ -82,7 +92,6 @@ find . -type f \
             -e "s/ModuleName/${MODULE_NAME}/g" \
             -e "s/modulename/${MODULE_LOWER}/g" \
             -e "s/Vendor/${VENDOR_NAME}/g" \
-            -e "s/vendor/${VENDOR_LOWER}/g" \
             "$file" 2>/dev/null || true
     fi
 done

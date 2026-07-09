@@ -15,12 +15,12 @@ description: >
 <?php
 declare(strict_types=1);
 
-namespace Vendor\Module\Test\Unit\Model;
+namespace vendor\Module\Test\Unit\Model;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Vendor\Module\Model\MyClass;
-use Vendor\Module\Api\Data\EntityInterface;
+use vendor\Module\Model\MyClass;
+use vendor\Module\Api\Data\EntityInterface;
 
 class MyClassTest extends TestCase
 {
@@ -96,7 +96,7 @@ $scopeConfigMock->method('getValue')
 <?php
 declare(strict_types=1);
 
-namespace Vendor\Module\Test\Integration\Model;
+namespace vendor\Module\Test\Integration\Model;
 
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
@@ -116,7 +116,7 @@ class EntityRepositoryTest extends TestCase
     }
 
     /**
-     * @magentoDataFixture Vendor_Module::Test/Integration/_files/entity.php
+     * @magentoDataFixture vendor_Module::Test/Integration/_files/entity.php
      */
     public function testGetById_WithExistingEntity_ReturnsEntity(): void
     {

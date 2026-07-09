@@ -2,6 +2,7 @@
 globs:
   - "**/*Test.php"
   - "**/Test/**/*.php"
+priority: 60
 ---
 
 # Testing Rules

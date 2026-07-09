@@ -5,7 +5,8 @@
     "license": "MIT",
     "version": "1.0.0",
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.2",
+        "magento/product-community-edition": "2.4.7-p8"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",
@@ -19,15 +20,29 @@
     },
     "autoload": {
         "psr-4": {
-            "Vendor\\ModuleName\\": "app/code/Vendor/ModuleName/"
+            "vendor\\CustomShipping\\": "app/code/vendor/CustomShipping/",
+            "Magento\\Setup\\": "setup/src/Magento/Setup/",
+            "Zend\\Mvc\\Controller\\": "setup/src/Zend/Mvc/Controller/"
+        },
+        "psr-0": {
+            "": [
+                "app/code/",
+                "generated/code/"
+            ]
         },
         "files": [
-            "app/code/Vendor/ModuleName/registration.php"
+            "app/code/vendor/CustomShipping/registration.php",
+            "app/etc/NonComposerComponentRegistration.php"
+        ],
+        "exclude-from-classmap": [
+            "**/dev/**",
+            "**/update/**",
+            "**/Test/**"
         ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Vendor\\ModuleName\\Test\\": "app/code/Vendor/ModuleName/Test/"
+            "vendor\\CustomShipping\\Test\\": "app/code/vendor/CustomShipping/Test/"
         }
     },
     "scripts": {
@@ -44,16 +59,31 @@
             "@test"
         ],
         "post-install-cmd": [
-            "vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility/ 2>/dev/null || true"
+            "php vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../magento/php-compatibility-fork/,../../phpcsstandards/phpcsutils/ 2>/dev/null || true",
+            "php scripts/fix-windows-vendor-bugs.php"
+        ],
+        "post-update-cmd": [
+            "php scripts/fix-windows-vendor-bugs.php"
         ]
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
             "captainhook/hook-installer": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/magento-composer-installer": true,
+            "magento/inventory-composer-installer": true,
+            "laminas/laminas-dependency-plugin": true,
+            "php-http/discovery": false
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ]
 }

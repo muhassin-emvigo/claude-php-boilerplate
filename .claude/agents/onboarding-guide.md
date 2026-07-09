@@ -48,8 +48,8 @@ Explain these Magento 2 patterns used in the project:
 
 ### 5. Key Files to Read First
 1. `CLAUDE.md` — project overview
-2. `app/code/Vendor/Module/etc/module.xml` — module registration
-3. `app/code/Vendor/Module/etc/di.xml` — dependency injection config
+2. `app/code/vendor/Module/etc/module.xml` — module registration
+3. `app/code/vendor/Module/etc/di.xml` — dependency injection config
 4. `composer.json` — dependencies and scripts
 5. `Makefile` — available developer commands
 

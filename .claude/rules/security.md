@@ -2,6 +2,7 @@
 globs:
   - "**/*.php"
   - "**/*.phtml"
+priority: 100
 ---
 
 # Security Rules
@@ -27,7 +28,7 @@ globs:
 
 ## Access Control
 - Define ACL resources in `etc/acl.xml` for every admin action
-- Admin controllers must declare `const ADMIN_RESOURCE = 'Vendor_Module::resource'`
+- Admin controllers must declare `const ADMIN_RESOURCE = 'vendor_Module::resource'`
 - Web API endpoints must specify ACL resource in `webapi.xml`
 - Never expose admin functionality without proper ACL checks
 
