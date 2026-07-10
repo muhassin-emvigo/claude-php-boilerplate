@@ -7,6 +7,7 @@ use Rgd\Inventory\Api\FefoBatchSelectorInterface;
 use Rgd\Inventory\Api\Data\BatchAllocationInterface;
 use Rgd\Inventory\Model\Data\BatchAllocation;
 use Rgd\Inventory\Model\ResourceModel\Batch\CollectionFactory;
+use Rgd\Inventory\Model\ResourceModel\Batch\Collection;
 use Magento\Framework\Exception\LocalizedException;
 use Zend_Db_Expr;
 
@@ -15,6 +16,17 @@ use Zend_Db_Expr;
  */
 class FefoBatchSelector implements FefoBatchSelectorInterface
 {
+    /**
+     * Row cap for getAvailableBatches(). This is a read-only, unauthenticated,
+     * uncached GraphQL display query (Model\Resolver\InventoryStock) — unlike
+     * selectForDeduction(), which must never cap its candidate scan (doing so
+     * would risk false "insufficient stock" errors on the write/deduction
+     * path), capping the number of batches returned here is safe: it only
+     * bounds the size of a stock-summary response and worst-case query cost
+     * for a single SKU, it does not affect deduction correctness.
+     */
+    private const MAX_AVAILABLE_BATCHES = 500;
+
     public function __construct(
         private CollectionFactory $collectionFactory,
     ) {}
@@ -28,25 +40,7 @@ class FefoBatchSelector implements FefoBatchSelectorInterface
         // read-only candidate-row scan.
         $collection->addFieldToSelect(['batch_id', 'batch_number', 'expiry_date', 'remaining_qty']);
 
-        // Filter: active, non-expired, with remaining qty > 0
-        $collection->addFieldToFilter('sku', $sku)
-            ->addFieldToFilter('source_code', $sourceCode)
-            ->addFieldToFilter('is_active', 1)
-            ->addFieldToFilter('remaining_qty', ['gt' => 0]);
-
-        // A batch expiring today is already treated as expired — only strictly
-        // future expiry dates (or no expiry at all) are usable.
-        $connection = $collection->getConnection();
-        $collection->getSelect()->where(
-            $connection->quoteInto('expiry_date IS NULL OR expiry_date > CURDATE()', [])
-        );
-
-        // Order by FEFO: earliest expiry first (NULL last), then by batch_id for determinism
-        $collection->getSelect()->order([
-            new Zend_Db_Expr('expiry_date IS NULL'),
-            'expiry_date ASC',
-            'batch_id ASC',
-        ]);
+        $this->applyCandidateFilterAndFefoOrder($collection, $sku, $sourceCode);
 
         // Calculate total available directly from the candidate collection — the
         // "any batches at all" / "all expired" diagnostic queries below are only
@@ -84,6 +78,58 @@ class FefoBatchSelector implements FefoBatchSelectorInterface
         }
 
         return $allocations;
+    }
+
+    public function getAvailableBatches(string $sku, string $sourceCode = 'default'): array
+    {
+        $collection = $this->collectionFactory->create();
+
+        // Narrow the select to only the columns the GraphQL read path actually
+        // consumes (Model\Resolver\InventoryStock maps batch_number, expiry_date,
+        // remaining_qty, and created_at → received_at). batch_id is kept too,
+        // matching selectForDeduction()'s narrowed select, since it is the
+        // collection's identity column.
+        $collection->addFieldToSelect(['batch_id', 'batch_number', 'expiry_date', 'remaining_qty', 'created_at']);
+
+        $this->applyCandidateFilterAndFefoOrder($collection, $sku, $sourceCode);
+
+        // Bound the row count — see MAX_AVAILABLE_BATCHES doc comment.
+        $collection->setPageSize(self::MAX_AVAILABLE_BATCHES);
+
+        return array_values(iterator_to_array($collection));
+    }
+
+    /**
+     * Apply the shared "active, non-expired, in-stock" candidate filter and FEFO
+     * ordering (earliest expiry first, NULL-expiry last, batch_id tiebreak) used
+     * by both selectForDeduction() and getAvailableBatches().
+     *
+     * @param Collection $collection
+     * @param string $sku
+     * @param string $sourceCode
+     * @return void
+     */
+    private function applyCandidateFilterAndFefoOrder(Collection $collection, string $sku, string $sourceCode): void
+    {
+        // Filter: active, non-expired, with remaining qty > 0
+        $collection->addFieldToFilter('sku', $sku)
+            ->addFieldToFilter('source_code', $sourceCode)
+            ->addFieldToFilter('is_active', 1)
+            ->addFieldToFilter('remaining_qty', ['gt' => 0]);
+
+        // A batch expiring today is already treated as expired — only strictly
+        // future expiry dates (or no expiry at all) are usable.
+        $connection = $collection->getConnection();
+        $collection->getSelect()->where(
+            $connection->quoteInto('expiry_date IS NULL OR expiry_date > CURDATE()', [])
+        );
+
+        // Order by FEFO: earliest expiry first (NULL last), then by batch_id for determinism
+        $collection->getSelect()->order([
+            new Zend_Db_Expr('expiry_date IS NULL'),
+            'expiry_date ASC',
+            'batch_id ASC',
+        ]);
     }
 
     /**

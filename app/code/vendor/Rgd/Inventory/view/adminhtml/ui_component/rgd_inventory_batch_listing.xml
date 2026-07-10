@@ -5,22 +5,24 @@
             <item name="provider" xsi:type="string">rgd_inventory_batch_listing.rgd_inventory_batch_listing_data_source</item>
             <item name="deps" xsi:type="string">rgd_inventory_batch_listing.rgd_inventory_batch_listing_data_source</item>
         </item>
-        <item name="spinner" xsi:type="string">rgd_inventory_batch_listing_columns</item>
-        <item name="buttons" xsi:type="array">
-            <item name="add" xsi:type="array">
-                <item name="buttonClasses" xsi:type="string">primary</item>
-                <item name="class" xsi:type="string">Magento\Ui\Component\Buttons\Add</item>
-                <item name="label" xsi:type="string" translate="true">Add New Batch</item>
-                <item name="url" xsi:type="string">rgd_inventory/batch/edit</item>
-            </item>
-        </item>
     </argument>
+    <settings>
+        <spinner>rgd_inventory_batch_listing_columns</spinner>
+        <buttons>
+            <button name="add">
+                <url path="rgd_inventory/batch/edit"/>
+                <class>primary</class>
+                <label translate="true">Add New Batch</label>
+            </button>
+        </buttons>
+    </settings>
     <dataSource name="rgd_inventory_batch_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="class" xsi:type="string">Rgd\Inventory\Ui\DataProvider\BatchListingDataProvider</argument>
             <argument name="name" xsi:type="string">rgd_inventory_batch_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">batch_id</argument>
             <argument name="requestFieldName" xsi:type="string">batch_id</argument>
+            <argument name="collectionFactory" xsi:type="object">Rgd\Inventory\Model\ResourceModel\Batch\CollectionFactory</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
@@ -28,11 +30,22 @@
                     <item name="storageConfig" xsi:type="array">
                         <item name="indexField" xsi:type="string">batch_id</item>
                     </item>
+                    <!--
+                        Magento\Ui\Controller\Adminhtml\Index\Render::validateAclResource()
+                        (the mui/index/render async grid-data endpoint) reads this exact key —
+                        $component->getContext()->getDataProvider()->getConfigData()['aclResource']
+                        i.e. AbstractDataProvider::getConfigData() = $this->data['config'] ?? [].
+                        This module's dataSource uses the raw <argument name="dataProvider"
+                        xsi:type="configurableObject"> style (not the typed <dataProvider class="...">
+                        + sibling <aclResource> element used elsewhere in core), so a sibling
+                        <aclResource> element under <dataSource> is never wired into the
+                        dataProvider's config and is silently ignored — it must be set here,
+                        inside data/config, to actually reach the ACL check.
+                    -->
+                    <item name="aclResource" xsi:type="string">Rgd_Inventory::batch</item>
                 </item>
             </argument>
         </argument>
-        <argument name="filterPoolName" xsi:type="string">rgd_inventory_batch_listing_filter_pool</argument>
-        <argument name="searchCriteriaBuilder" xsi:type="object">Magento\Framework\Api\Search\SearchCriteriaBuilder</argument>
     </dataSource>
     <container name="listing_top">
         <argument name="data" xsi:type="array">

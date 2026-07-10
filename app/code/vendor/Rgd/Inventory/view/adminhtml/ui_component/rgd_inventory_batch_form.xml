@@ -3,181 +3,159 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">rgd_inventory_batch_form.rgd_inventory_batch_form_data_source</item>
-            <item name="deps" xsi:type="string">rgd_inventory_batch_form.rgd_inventory_batch_form_data_source</item>
+            <item name="component" xsi:type="string">Magento_Ui/js/form/form</item>
         </item>
         <item name="label" xsi:type="string" translate="true">Batch Information</item>
-        <item name="config" xsi:type="array">
-            <item name="dataScope" xsi:type="string">data</item>
-            <item name="namespace" xsi:type="string">rgd_inventory_batch_form</item>
-        </item>
-        <item name="template" xsi:type="string">templates/form/default</item>
-        <item name="buttons" xsi:type="array">
-            <item name="back" xsi:type="array">
-                <item name="componentType" xsi:type="string">container</item>
-                <item name="component" xsi:type="string">Magento_Ui/js/form/components/button</item>
-                <item name="actions" xsi:type="array">
-                    <item name="0" xsi:type="array">
-                        <item name="targetName" xsi:type="string">*</item>
-                        <item name="actionName" xsi:type="string">back</item>
-                    </item>
-                </item>
-                <item name="title" xsi:type="string" translate="true">Back</item>
-                <item name="provider" xsi:type="null"/>
-            </item>
-            <item name="delete" xsi:type="array">
-                <item name="componentType" xsi:type="string">container</item>
-                <item name="component" xsi:type="string">Magento_Ui/js/form/components/button</item>
-                <item name="actions" xsi:type="array">
-                    <item name="0" xsi:type="array">
-                        <item name="targetName" xsi:type="string">*</item>
-                        <item name="actionName" xsi:type="string">delete</item>
-                    </item>
-                </item>
-                <item name="title" xsi:type="string" translate="true">Delete</item>
-                <item name="provider" xsi:type="null"/>
-            </item>
-            <item name="save" xsi:type="array">
-                <item name="componentType" xsi:type="string">container</item>
-                <item name="component" xsi:type="string">Magento_Ui/js/form/components/button</item>
-                <item name="actions" xsi:type="array">
-                    <item name="0" xsi:type="array">
-                        <item name="targetName" xsi:type="string">*</item>
-                        <item name="actionName" xsi:type="string">save</item>
-                    </item>
-                </item>
-                <item name="title" xsi:type="string" translate="true">Save Batch</item>
-                <item name="provider" xsi:type="null"/>
-            </item>
-        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
     </argument>
+    <settings>
+        <buttons>
+            <button name="back">
+                <url path="rgd_inventory/batch/index"/>
+                <class>back</class>
+                <label translate="true">Back</label>
+            </button>
+            <button name="delete">
+                <url path="rgd_inventory/batch/delete"/>
+                <class>delete</class>
+                <label translate="true">Delete</label>
+            </button>
+            <button name="save">
+                <url path="rgd_inventory/batch/save"/>
+                <class>save primary</class>
+                <label translate="true">Save Batch</label>
+            </button>
+        </buttons>
+        <namespace>rgd_inventory_batch_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>rgd_inventory_batch_form.rgd_inventory_batch_form_data_source</dep>
+        </deps>
+    </settings>
     <dataSource name="rgd_inventory_batch_form_data_source">
         <argument name="data" xsi:type="array">
             <item name="js_config" xsi:type="array">
                 <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
             </item>
         </argument>
-        <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Rgd\Inventory\Ui\DataProvider\BatchDataProvider</argument>
-            <argument name="name" xsi:type="string">rgd_inventory_batch_form_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">batch_id</argument>
-            <argument name="requestFieldName" xsi:type="string">batch_id</argument>
-        </argument>
+        <settings>
+            <submitUrl path="rgd_inventory/batch/save"/>
+        </settings>
+        <dataProvider class="Rgd\Inventory\Ui\DataProvider\BatchDataProvider" name="rgd_inventory_batch_form_data_source">
+            <settings>
+                <requestFieldName>batch_id</requestFieldName>
+                <primaryFieldName>batch_id</primaryFieldName>
+            </settings>
+        </dataProvider>
     </dataSource>
     <fieldset name="general" sortOrder="10">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="label" xsi:type="string" translate="true">General Information</item>
-                <item name="collapsible" xsi:type="boolean">false</item>
-            </item>
-        </argument>
+        <settings>
+            <label translate="true">General Information</label>
+            <collapsible>false</collapsible>
+        </settings>
         <field name="batch_id" formElement="hidden">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="source" xsi:type="string">rgd_inventory_batch_form</item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <visible>false</visible>
+                <dataScope>batch_id</dataScope>
+            </settings>
         </field>
         <field name="sku" sortOrder="10" formElement="input">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">SKU</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">text</item>
-                    <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">SKU</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
         </field>
         <field name="batch_number" sortOrder="20" formElement="input">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">Batch Number</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">text</item>
-                    <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
-                        <item name="max_text_length" xsi:type="integer">64</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Batch Number</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="max_text_length" xsi:type="number">64</rule>
+                </validation>
+            </settings>
         </field>
         <field name="source_code" sortOrder="30" formElement="select">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">Source</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">text</item>
-                    <item name="default" xsi:type="string">default</item>
-                    <item name="options" xsi:type="array">
-                        <item name="0" xsi:type="array">
-                            <item name="label" xsi:type="string">Default</item>
-                            <item name="value" xsi:type="string">default</item>
-                        </item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Source</label>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="0" xsi:type="array">
+                                <item name="value" xsi:type="string">default</item>
+                                <item name="label" xsi:type="string">Default</item>
+                            </option>
+                        </options>
+                    </settings>
+                </select>
+            </formElements>
         </field>
         <field name="expiry_date" sortOrder="40" formElement="date">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">Expiry Date</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">date</item>
-                    <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>date</dataType>
+                <label translate="true">Expiry Date</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <date>
+                    <settings>
+                        <options>
+                            <!-- Without an explicit ISO dateFormat, Magento_Ui/js/form/element/date.js
+                                 defaults outputDateFormat to 'MM/dd/y' (ICU), which BatchRepository's
+                                 and Batch/Save's server-side Y-m-d format checks then always reject. -->
+                            <option name="dateFormat" xsi:type="string">y-MM-dd</option>
+                        </options>
+                    </settings>
+                </date>
+            </formElements>
         </field>
         <field name="received_qty" sortOrder="50" formElement="input">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">Received Qty</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">number</item>
-                    <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
-                        <item name="validate-number" xsi:type="boolean">true</item>
-                        <item name="validate-greater-than-zero" xsi:type="boolean">true</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Received Qty</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
         </field>
         <field name="remaining_qty" sortOrder="60" formElement="input">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="required" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">Remaining Qty</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">number</item>
-                    <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
-                        <item name="validate-number" xsi:type="boolean">true</item>
-                        <item name="validate-zero-or-greater" xsi:type="boolean">true</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Remaining Qty</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
         </field>
         <field name="is_active" sortOrder="70" formElement="checkbox">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="label" xsi:type="string" translate="true">Active</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="dataType" xsi:type="string">boolean</item>
-                    <item name="prefer" xsi:type="string">checkbox</item>
-                    <item name="default" xsi:type="string">1</item>
-                    <item name="valueMap" xsi:type="array">
-                        <item name="true" xsi:type="string">1</item>
-                        <item name="false" xsi:type="string">0</item>
-                    </item>
-                </item>
-            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Active</label>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="string">0</map>
+                            <map name="true" xsi:type="string">1</map>
+                        </valueMap>
+                        <prefer>checkbox</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
         </field>
     </fieldset>
 </form>

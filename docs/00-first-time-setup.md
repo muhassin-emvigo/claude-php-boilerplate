@@ -89,12 +89,19 @@ Your browser should open automatically to `http://localhost/rgd_dental/`. If it 
   ```
   and then `make magento-run` again.
 - **Search engine not reachable** — make sure OpenSearch is running and listening on port 9200 before running `install-magento-xampp.ps1`.
-- **Admin login page keeps reappearing after you submit the correct username/password, with no error message at all** — `install-magento-xampp.ps1` now disables `Magento_ReCaptchaUser` automatically (it breaks admin login entirely when no Google reCAPTCHA API keys are configured, which is normal for local dev). If you still see this on an older install, run:
-  ```bash
-  php bin/magento module:disable Magento_ReCaptchaUser
-  php bin/magento setup:upgrade
-  php bin/magento cache:flush
-  ```
+- **Admin login page keeps reappearing after you submit the correct username/password, with no error message at all** — this has two known independent causes on this project. `install-magento-xampp.ps1` now handles both automatically:
+  1. `Magento_ReCaptchaUser` breaks admin login entirely when no Google reCAPTCHA API keys are configured (normal for local dev). Fix:
+     ```bash
+     php bin/magento module:disable Magento_ReCaptchaUser
+     php bin/magento setup:upgrade
+     php bin/magento cache:flush
+     ```
+  2. If `generated/metadata` exists on disk (left over from `setup:di:compile`), Magento silently switches to "Compiled" DI mode regardless of `deploy:mode:set developer` — and in this Magento version, Compiled mode never wraps admin controllers in their Interceptor classes, so **no `AbstractAction`-level plugins run at all**, including the plugin that processes the login form and the one that loads the admin theme. Symptoms: login form just redisplays with no error, and `var/log/debug.log` shows repeated "Broken reference" warnings for `header`/`footer`/`messages` layout containers. Fix:
+     ```bash
+     rm -rf generated/metadata
+     php bin/magento cache:flush
+     ```
+     (Keep `generated/code` — PHPUnit and Factory/Proxy autoloading still need it. Only `generated/metadata` forces Compiled mode.)
 - Still stuck? See the full checklist in [03-testing-the-site.md](03-testing-the-site.md).
 
 Once installed, you won't need this guide again — just use [01-getting-started.md](01-getting-started.md) to start the site each time.

@@ -2,92 +2,280 @@
 
 **Requested by:** Suraj UK
 
-**Date:** 2026-07-08
+**Date:** 2026-07-10
 
-**Status:** In Progress — implemented (docs/spec-batch-based-inventory-management.md), through Code Review + Approver gates (see docs/progress-batch-based-inventory-management.md); not yet committed/shipped
+**Priority:** High
+
+**Status:** Ready for Implementation
 
 ---
 
-## What do you want?
+# Objective
 
-The clinic needs inventory to be managed by both **SKU** and **Batch Number**.
+Implement a **Batch-Based Inventory Management** system using the **First Expiry, First Out (FEFO)** inventory strategy.
 
-A single medicine (SKU) can have multiple batches, and each batch has its own:
+Inventory must be managed by **SKU + Batch Number**, while customers continue purchasing products using only the SKU. Batch selection must happen automatically in the backend.
+
+---
+
+# Business Requirements
+
+## Inventory Structure
+
+Each product (SKU) can have multiple inventory batches.
+
+Each batch must contain:
+
+- SKU
 - Batch Number
 - Expiry Date
 - Available Quantity
 
-When dispensing or selling medicine, the system should automatically select the batch with the earliest expiry date that has available stock.
+Inventory uniqueness must be based on:
+
+```
+SKU + Batch Number
+```
+
+SKU itself is **not unique**.
 
 ---
 
-## Why do you want it?
+# FEFO (First Expiry, First Out)
 
-The same medicine is often received in multiple batches with different expiry dates.
+Whenever inventory is deducted (checkout, dispensing, order creation, etc.):
 
-To reduce expired stock and ensure medicines are dispensed correctly, inventory should follow the **First Expiry, First Out (FEFO)** method.
-
-This helps:
-- Reduce medicine wastage.
-- Ensure older stock is used first.
-- Improve inventory accuracy.
-- Follow pharmacy inventory best practices.
+1. Ignore expired batches.
+2. Find all batches for the SKU.
+3. Sort by Expiry Date (ascending).
+4. Select the earliest valid batch with available quantity.
+5. Deduct inventory from that batch.
+6. If quantity becomes zero, automatically continue with the next valid batch.
+7. Customers must never choose the batch manually.
 
 ---
 
-## What does "done" look like?
+# Checkout Behaviour
 
-When multiple batches exist for the same SKU:
+Do NOT introduce new Out of Stock behaviour.
 
-- The system always deducts stock from the batch with the earliest expiry date.
-- If that batch runs out of stock, the system automatically switches to the next available batch.
-- Customers and clinic staff continue to purchase the same product without needing to select a batch.
-- The product remains **In Stock** as long as at least one batch has available quantity.
-- The product is shown as **Out of Stock** only when **all batches** for that SKU have zero available quantity.
-- Each inventory transaction records the actual batch used for traceability.
+The existing checkout flow should continue to work.
 
-### Example
+Requirements:
 
-| SKU | Batch | Expiry | Quantity |
-|-----|-------|---------|---------:|
+- Product availability must continue following the existing business logic.
+- The FEFO engine should automatically select the correct batch.
+- If one batch becomes empty, the next valid batch should automatically be used.
+- No customer interaction is required.
+
+Do not add any feature that forces products Out of Stock because an individual batch is empty.
+
+---
+
+# Expired Batch Rules
+
+Expired batches:
+
+- cannot be sold
+- cannot be allocated
+- cannot be selected by FEFO
+- must remain visible in Admin
+- should be clearly marked as Expired
+
+---
+
+# Admin Requirements
+
+## Batch Inventory List
+
+Create an Admin screen for batch inventory.
+
+Display:
+
+- SKU
+- Product Name
+- Batch Number
+- Expiry Date
+- Available Quantity
+- Status (Active / Expired)
+- Last Updated
+
+Support:
+
+- Pagination
+- Search
+- Sorting
+- Filters
+
+Filters:
+
+- SKU
+- Batch Number
+- Product
+- Expiry Date
+- Status
+
+---
+
+## Batch Inventory CRUD
+
+Admin must be able to:
+
+- View batches
+- Add batch
+- Edit batch
+- Update quantity
+- Update expiry date
+- Delete batch (if business rules allow)
+
+Validation:
+
+- SKU + Batch Number must be unique.
+- Quantity cannot be negative.
+- Expiry date is mandatory.
+- Batch Number is mandatory.
+
+---
+
+# Inventory Export
+
+Provide batch-wise inventory export.
+
+Supported formats:
+
+- CSV
+- Excel (XLSX)
+
+Columns:
+
+- SKU
+- Product Name
+- Batch Number
+- Expiry Date
+- Available Quantity
+- Reserved Quantity (if applicable)
+- Status
+- Last Updated
+
+Export should support current filters.
+
+---
+
+# Frontend Requirements
+
+Customers continue purchasing products normally.
+
+No batch selection UI is required.
+
+However, Batch Number should be visible wherever it improves traceability.
+
+Display Batch Number on:
+
+- Order Details
+- Invoice
+- Shipment
+- Admin Order View
+- Dispensing History
+- Customer Order History (if applicable)
+
+This helps clinic staff identify the exact medicine batch that was dispensed.
+
+---
+
+# Inventory Transactions
+
+Every inventory transaction must store:
+
+- SKU
+- Batch Number
+- Quantity
+- Transaction Type
+- Order ID (if applicable)
+- User
+- Timestamp
+
+This is required for auditing and traceability.
+
+---
+
+# Reports
+
+Reports must support:
+
+- SKU
+- Product
+- Batch Number
+- Expiry Date
+- Remaining Quantity
+- Available Quantity
+- Active Batches
+- Expired Batches
+
+Filters:
+
+- SKU
+- Batch
+- Product
+- Expiry Date
+- Status
+
+---
+
+# Example
+
+Current Inventory
+
+| SKU | Batch | Expiry | Qty |
+|-----|-------|---------|----:|
 | TAB-001 | B001 | 2026-09-30 | 50 |
 | TAB-001 | B002 | 2027-02-28 | 100 |
 
-**Scenario 1**
+Customer purchases 20.
 
-Customer purchases 20 tablets.
+Result:
 
-- 20 tablets are deducted from **Batch B001**.
-- Remaining quantity:
-  - B001 = 30
-  - B002 = 100
+B001 → 30
 
-**Scenario 2**
+Customer purchases another 30.
 
-Another customer purchases 30 tablets.
+Result:
 
-- Remaining 30 tablets are deducted from **Batch B001**.
-- B001 is now empty.
+B001 → 0
 
-**Scenario 3**
+Customer purchases 10.
 
-Next customer purchases 10 tablets.
+Result:
 
-- The system automatically deducts 10 tablets from **Batch B002**.
-- The product is still available for purchase.
+B002 → 90
 
-**Scenario 4**
-
-The product becomes **Out of Stock** only after **both Batch B001 and Batch B002 have zero available quantity**.
+No manual batch selection.
 
 ---
 
-## Anything else the developer should know?
+# Acceptance Criteria
 
-- SKU is **not unique**.
-- Inventory records are uniquely identified by **SKU + Batch Number**.
-- Each batch has its own expiry date and available quantity.
-- Batch selection should be automatic and based on the earliest expiry date with available stock.
-- Expired batches must not be used for dispensing or sales.
-- The batch used for every transaction must be stored for auditing and traceability.
-- Reports should support filtering by SKU, Batch Number, Expiry Date, and remaining quantity.
+- Inventory is managed by SKU + Batch Number.
+- FEFO allocation always uses the earliest valid expiry date.
+- Expired batches are never allocated.
+- Customers never choose batches.
+- Automatic switch to the next batch when current batch is empty.
+- Existing checkout behaviour remains unchanged.
+- Admin can manage batches.
+- Admin can export batch-wise inventory.
+- Batch Number is stored with every inventory transaction.
+- Batch Number is visible in frontend order-related pages for traceability.
+- Reports support batch-level filtering and inventory visibility.
+
+---
+
+# Technical Notes
+
+- Follow Magento 2 coding standards.
+- Use Service Contracts where applicable.
+- Avoid modifying Magento core.
+- Use Dependency Injection.
+- Follow repository pattern.
+- Maintain backward compatibility.
+- Ensure implementation supports future multi-source inventory (MSI) integration if required.
+- Write unit and integration tests where applicable.
+- Ensure inventory deduction is transactional to avoid race conditions during concurrent orders.

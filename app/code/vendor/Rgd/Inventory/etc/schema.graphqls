@@ -1,0 +1,22 @@
+type Query {
+    rgdInventoryStock(
+        sku: String! @doc(description: "Product SKU to check batch stock for")
+        sourceCode: String = "default" @doc(description: "MSI source code")
+    ): RgdInventoryStock
+        @resolver(class: "Rgd\\Inventory\\Model\\Resolver\\InventoryStock")
+        @doc(description: "FEFO batch inventory and available-to-sell quantity for a SKU. Excludes inactive, expired, and out-of-stock batches — a batch expiring today is already treated as expired.")
+        @cache(cacheable: false)
+}
+
+type RgdInventoryStock @doc(description: "Batch inventory summary for a SKU") {
+    sku: String! @doc(description: "Product SKU")
+    available_qty: Float! @doc(description: "Total sellable quantity across active, non-expired batches")
+    batches: [RgdInventoryBatch] @doc(description: "Active, non-expired, in-stock batches ordered earliest-expiry-first (FEFO order)")
+}
+
+type RgdInventoryBatch @doc(description: "A single inventory batch") {
+    batch_number: String! @doc(description: "Batch/lot number")
+    expiry_date: String @doc(description: "Expiry date (Y-m-d), null if the batch does not track expiry")
+    available_qty: Float! @doc(description: "Remaining sellable quantity in this batch")
+    received_at: String @doc(description: "When this batch was received into inventory")
+}

@@ -235,6 +235,29 @@ php bin/magento setup:upgrade --no-interaction
 php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy -f en_US
 php bin/magento deploy:mode:set developer
+
+Say 'Removing compiled DI metadata (keep developer-mode interception working)'
+# setup:di:compile leaves generated/metadata on disk. Magento's EnvironmentFactory
+# decides Compiled vs Developer mode purely by checking whether
+# generated/metadata/global.php exists (Magento\Framework\App\EnvironmentFactory::getMode) -
+# it does NOT check deploy:mode:set. With generated/metadata present, Magento uses
+# Magento\Framework\Interception\ObjectManager\Config\Compiled, whose getInstanceType()
+# has no dynamic interception check; it only returns pre-baked Interceptor class names
+# from the compiled "preferences" array. That array does not include controller classes
+# (e.g. admin Auth\Login, Dashboard\Index), so in Compiled mode NO AbstractAction-level
+# plugins run at all - including the admin login-processing plugin
+# (Magento\Backend\App\Action\Plugin\Authentication) and the admin theme/design loader
+# (LoadDesignPlugin). Symptom: admin login form redisplays after a correct
+# username/password with no error message and no redirect, and admin layout containers
+# (header/footer/messages) show "Broken reference" warnings in var/log/debug.log.
+# Deleting generated/metadata (keeping generated/code, which PHPUnit's mock generator
+# and Factory/Proxy autoloading still need) forces Magento back into Developer
+# environment mode, which resolves interception dynamically per-request via
+# Magento\Framework\Interception\ObjectManager\Config\Developer::getInstanceType() and
+# works correctly. This is also simply the correct setup for a developer-mode install -
+# setup:di:compile is a production-deploy step and shouldn't be relied on locally.
+Remove-Item -Path 'generated/metadata' -Recurse -Force -ErrorAction SilentlyContinue
+
 php bin/magento cache:flush
 php bin/magento indexer:reindex
 

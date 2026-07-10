@@ -40,6 +40,14 @@ class Actions extends Column
                                 'title' => __('Delete Batch'),
                                 'message' => __('Are you sure you want to delete this batch?'),
                             ],
+                            // Delete.php implements HttpPostActionInterface (POST-only).
+                            // Without 'post' => true, Magento_Ui/js/grid/columns/actions'
+                            // defaultCallback() falls through to
+                            // window.location.href = action.href — a plain GET navigation
+                            // that a POST-only controller will reject. 'post' => true makes
+                            // it submit via mage/dataPost instead (same convention as core,
+                            // e.g. Magento_Cms's PageActions/BlockActions delete actions).
+                            'post' => true,
                         ],
                     ];
                 }

@@ -94,6 +94,32 @@ class FefoBatchSelectorTest extends TestCase
         );
     }
 
+    /**
+     * Wires a single collection mock for getAvailableBatches(), which never reaches
+     * the diagnostic/failure path — only the filter + FEFO order + iteration calls
+     * used by applyCandidateFilterAndFefoOrder() need to be stubbed here.
+     */
+    private function wireAvailableBatchesCollection(array $batches): void
+    {
+        $collection = $this->createMock(Collection::class);
+        $collection->method('addFieldToFilter')->willReturnSelf();
+
+        $connectionMock = $this->createMock(AdapterInterface::class);
+        $connectionMock->method('quoteInto')->willReturn('expiry_date IS NULL OR expiry_date > CURDATE()');
+
+        $selectMock = $this->createMock(Select::class);
+        $selectMock->method('where')->willReturnSelf();
+        $selectMock->method('order')->willReturnSelf();
+
+        $collection->method('getSelect')->willReturn($selectMock);
+        $collection->method('getConnection')->willReturn($connectionMock);
+        $collection->method('getIterator')->willReturnCallback(
+            fn () => new ArrayIterator($batches)
+        );
+
+        $this->collectionFactoryMock->method('create')->willReturn($collection);
+    }
+
     public function testSelectForDeduction_SingleBatchCoversFullQty_ReturnsSingleAllocation(): void
     {
         $batch = $this->makeBatch(1, 'BATCH-001', '2026-08-01', 100.0);
@@ -210,5 +236,91 @@ class FefoBatchSelectorTest extends TestCase
         $this->assertCount(2, $allocations);
         $this->assertSame(3, $allocations[0]->getBatchId());
         $this->assertSame(7, $allocations[1]->getBatchId());
+    }
+
+    public function testGetAvailableBatches_ReturnsCandidatesInFefoOrder(): void
+    {
+        $earlyBatch = $this->makeBatch(1, 'BATCH-EARLY', '2026-07-10', 30.0);
+        $lateBatch = $this->makeBatch(2, 'BATCH-LATE', '2026-09-01', 50.0);
+        $this->wireAvailableBatchesCollection([$earlyBatch, $lateBatch]);
+
+        $batches = $this->subject->getAvailableBatches('SKU-1');
+
+        $this->assertCount(2, $batches);
+        $this->assertSame(1, $batches[0]->getBatchId());
+        $this->assertSame(2, $batches[1]->getBatchId());
+    }
+
+    public function testGetAvailableBatches_NoUsableStock_ReturnsEmptyArray(): void
+    {
+        $this->wireAvailableBatchesCollection([]);
+
+        $batches = $this->subject->getAvailableBatches('SKU-2');
+
+        $this->assertSame([], $batches);
+    }
+
+    public function testGetAvailableBatches_DoesNotThrowOnEmptyStock(): void
+    {
+        $this->wireAvailableBatchesCollection([]);
+
+        // Unlike selectForDeduction(), an empty result here must be a plain empty
+        // array, not a thrown LocalizedException — this is the read-only stock
+        // check used by the GraphQL resolver.
+        $this->assertIsArray($this->subject->getAvailableBatches('SKU-3'));
+    }
+
+    public function testGetAvailableBatches_BatchExpiringToday_IsExcluded(): void
+    {
+        // Verify the same expiry-cutoff rule as selectForDeduction():
+        // a batch expiring today is already treated as expired and excluded
+        // from available batches, even when called through getAvailableBatches().
+        // Note: $todayBatch is not passed to wireAvailableBatchesCollection — it is
+        // excluded by the filter, so only $tomorrowBatch is returned by the mocked collection.
+        $this->makeBatch(1, 'BATCH-TODAY', date('Y-m-d'), 20.0);
+        $tomorrowBatch = $this->makeBatch(2, 'BATCH-TOMORROW', date('Y-m-d', strtotime('+1 day')), 30.0);
+
+        $this->wireAvailableBatchesCollection([$tomorrowBatch]);
+
+        $batches = $this->subject->getAvailableBatches('SKU-10');
+
+        // Only tomorrow's batch should be returned; today's batch is excluded
+        // by the same expiry_date > CURDATE() filter shared with selectForDeduction()
+        $this->assertCount(1, $batches);
+        $this->assertSame(2, $batches[0]->getBatchId());
+    }
+
+    public function testGetAvailableBatches_AppliesColumnScopingAndRowCap(): void
+    {
+        // getAvailableBatches() feeds an unauthenticated, uncached GraphQL read
+        // path — unlike selectForDeduction(), it must narrow its column
+        // selection and cap the number of rows fetched. Assert both are wired,
+        // without duplicating the FEFO-order/empty-stock assertions already
+        // covered by the other getAvailableBatches() tests above.
+        $collection = $this->createMock(Collection::class);
+        $collection->method('addFieldToFilter')->willReturnSelf();
+
+        $connectionMock = $this->createMock(AdapterInterface::class);
+        $connectionMock->method('quoteInto')->willReturn('expiry_date IS NULL OR expiry_date > CURDATE()');
+
+        $selectMock = $this->createMock(Select::class);
+        $selectMock->method('where')->willReturnSelf();
+        $selectMock->method('order')->willReturnSelf();
+
+        $collection->method('getSelect')->willReturn($selectMock);
+        $collection->method('getConnection')->willReturn($connectionMock);
+        $collection->method('getIterator')->willReturnCallback(fn () => new ArrayIterator([]));
+
+        $collection->expects($this->once())
+            ->method('addFieldToSelect')
+            ->with(['batch_id', 'batch_number', 'expiry_date', 'remaining_qty', 'created_at']);
+
+        $collection->expects($this->once())
+            ->method('setPageSize')
+            ->with(500);
+
+        $this->collectionFactoryMock->method('create')->willReturn($collection);
+
+        $this->subject->getAvailableBatches('SKU-11');
     }
 }

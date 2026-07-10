@@ -141,12 +141,15 @@ Read-only batch selection (no locking or mutation).
 interface FefoBatchSelectorInterface
 {
     public function selectForDeduction(string $sku, float $requestedQty, string $sourceCode = 'default'): array;
+    public function getAvailableBatches(string $sku, string $sourceCode = 'default'): array;
 }
 ```
 
-Returns an array of `BatchAllocationInterface` objects (immutable DTOs) ordered by earliest expiry first.
+`selectForDeduction()` returns an array of `BatchAllocationInterface` objects (immutable DTOs) ordered by earliest expiry first.
 
-**Error Handling:**
+`getAvailableBatches()` returns an array of `BatchInterface` objects for all active, non-expired, in-stock batches in the same FEFO order — but, unlike `selectForDeduction()`, it never throws and doesn't allocate against a target quantity. It's the read-only stock/expiry check used by the GraphQL resolver below (and is the method to reach for anywhere else that just needs "what's currently sellable for this SKU" without needing to consume it).
+
+**Error Handling (`selectForDeduction` only):**
 - Throws `LocalizedException` with distinct messages for:
   - `RGD_INV_INSUFFICIENT_STOCK` — Not enough stock across all batches
   - No batches configured for SKU
@@ -395,6 +398,36 @@ a batch that has history is to deactivate it**, not delete it:
    and `BatchDeductionService`'s locked candidate query, so it will never be drawn from again, while its
    full transaction history remains intact and queryable.
 
+## GraphQL API
+
+A single read-only query, `rgdInventoryStock`, exposes FEFO batch stock for a SKU to headless/mobile
+frontends — the same "what's currently sellable" data as `FefoBatchSelectorInterface::getAvailableBatches()`,
+over GraphQL instead of REST. Unauthenticated, like standard product stock queries.
+
+```graphql
+{
+  rgdInventoryStock(sku: "SKU-123") {
+    sku
+    available_qty
+    batches {
+      batch_number
+      expiry_date
+      available_qty
+      received_at
+    }
+  }
+}
+```
+
+- `available_qty` is the sum of `remaining_qty` across active, non-expired batches — a batch expiring
+  today is already treated as expired, matching the deduction path's rule.
+- `batches` is ordered earliest-expiry-first (FEFO order), with NULL-expiry batches last.
+- An unknown or out-of-stock SKU returns `available_qty: 0, batches: []` rather than an error.
+- A missing/empty `sku` argument throws a `graphql-input` category error.
+- Optional `sourceCode` argument (defaults to `"default"`) scopes the query to an MSI source.
+
+Schema: `etc/schema.graphqls`. Resolver: `Model/Resolver/InventoryStock.php`.
+
 ## Known limitations (Phase 1)
 
 These are deliberate, documented scope cuts from the approved spec/ADR — not oversights — but anyone
@@ -532,11 +565,12 @@ Menu:
 
 ## Testing
 
-**Shipped test coverage:** `Test/Unit/Model/` contains 37 passing unit tests across
+**Shipped test coverage:** `Test/Unit/Model/` contains 40 passing unit tests across
 `BatchDeductionServiceTest`, `BatchRepositoryTest`, `FefoBatchSelectorTest`, and
 `SourceDeductionCoordinatorTest` — covering FEFO allocation ordering, the three distinct
-insufficient-stock/expired/unconfigured error paths, save() validation, the delete-guard, and the
-coordinator's shared-transaction/rollback behavior (mocked connection).
+insufficient-stock/expired/unconfigured error paths, save() validation, the delete-guard, the
+coordinator's shared-transaction/rollback behavior (mocked connection), and the read-only
+`getAvailableBatches()` path used by the GraphQL resolver (FEFO order, empty-stock, never throws).
 
 In addition to the unit suite, this module went through a real-MySQL scenario-verification pass
 (11/11 checks; see [docs/qa-scenario-verification-batch-based-inventory-management.md](../../../../../docs/qa-scenario-verification-batch-based-inventory-management.md) in the
