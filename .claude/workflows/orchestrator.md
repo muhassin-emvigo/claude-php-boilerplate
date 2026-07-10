@@ -3,6 +3,15 @@
 ## Role
 Sequence agents. Enforce gates. Route by flow_type. Never execute work directly.
 
+## Machine-readable source
+The phase graph below is also modeled in `.claude/workflows/workflow-manifest.yaml` —
+use that file when you need to reason programmatically about phase dependencies
+(`depends_on`, `strength: required|recommended`), which phases are `optional`
+per flow_type, `run_once` guards, or external prerequisites (e.g.
+`security-guidance` before Testing/Review). This file remains the authoritative
+prose walkthrough for a human or agent reading top-to-bottom; keep both in sync
+if the phase sequence ever changes.
+
 ## On every task
 
 ```
@@ -53,7 +62,7 @@ Sequence agents. Enforce gates. Route by flow_type. Never execute work directly.
 ## Loopback rules
 
 | From         | Condition                        | Return to | Pass context                          |
-|--------------|----------------------------------|-----------|---------------------------------------|
+|--------------|-----------------------------------|-----------|----------------------------------------|
 | Testing      | Any test fails                   | Build     | Failure log from docs/progress.md     |
 | Testing      | security-guidance flags partial fix | Build  | security-guidance output              |
 | Review       | Any BLOCKER finding              | Build     | Full review checklist                 |
