@@ -20,6 +20,8 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryApi\Api\SourceRepositoryInterface;
 use Zend_Db_Expr;
+use DateTime;
+use Exception;
 
 /**
  * Batch save controller
@@ -115,7 +117,7 @@ class Save extends Action implements HttpPostActionInterface
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             return $resultRedirect->setPath('rgd_inventory/batch/edit', ['batch_id' => $batchId]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addErrorMessage((string)__('An error occurred while saving the batch.'));
             return $resultRedirect->setPath('rgd_inventory/batch/edit', ['batch_id' => $batchId]);
         }
@@ -256,8 +258,8 @@ class Save extends Action implements HttpPostActionInterface
         }
 
         try {
-            return (new \DateTime($expiryDate))->format('Y-m-d');
-        } catch (\Exception $e) {
+            return (new DateTime($expiryDate))->format('Y-m-d');
+        } catch (Exception $e) {
             return $expiryDate;
         }
     }
@@ -279,8 +281,8 @@ class Save extends Action implements HttpPostActionInterface
             return false;
         }
 
-        $parsed = \DateTime::createFromFormat('Y-m-d', $expiryDate);
-        $formatErrors = \DateTime::getLastErrors();
+        $parsed = DateTime::createFromFormat('Y-m-d', $expiryDate);
+        $formatErrors = DateTime::getLastErrors();
         $hasFormatErrors = $formatErrors !== false
             && ($formatErrors['warning_count'] > 0 || $formatErrors['error_count'] > 0);
 

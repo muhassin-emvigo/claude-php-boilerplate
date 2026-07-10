@@ -6,7 +6,19 @@
 
 **Priority:** High
 
-**Status:** Ready for Implementation
+**Status:** Phase 1 Implemented — Pending Final Approval
+
+---
+
+# Implementation Phasing
+
+This requirement is being delivered in two phases. Phase 1 (this implementation) covers
+core batch tracking, FEFO deduction, admin batch CRUD, and the GraphQL stock API. The
+following items described below are **deferred to Phase 2** and are not yet implemented:
+
+- CSV/XLSX batch-wise inventory export (see "Inventory Export" section)
+- Reports with batch-level filtering and inventory visibility (see "Reports" section)
+- Frontend batch-number traceability on order-related pages (see "Reports" acceptance criteria)
 
 ---
 
