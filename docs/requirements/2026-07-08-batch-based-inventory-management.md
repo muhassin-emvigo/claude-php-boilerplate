@@ -1,293 +1,251 @@
-# Batch-Based Inventory Management (FEFO)
+# Batch-Based Inventory Management (FEFO) --- Business Requirements
 
-**Requested by:** Suraj UK
+## 1. Purpose
 
-**Date:** 2026-07-10
+Implement a Batch-Based Inventory Management system using the First
+Expiry, First Out (FEFO) inventory strategy. The system must manage
+inventory at the Batch Number level while allowing customers to continue
+purchasing products using only the SKU. Batch allocation must occur
+automatically during inventory deduction.
 
-**Priority:** High
+## 2. Business Objective
 
-**Status:** Phase 1 Implemented — Pending Final Approval
+-   **Primary Objective:** Manage inventory by SKU and Batch Number
+    using FEFO.
+-   **Expected Business Outcome:** Reduce medicine expiry loss and
+    improve inventory traceability.
+-   **Success Measure:**
+    -   Earliest valid batch is always selected.
+    -   Expired batches are never sold.
+    -   Automatic allocation across batches.
+-   **Target Users:**
+    -   Store Administrators
+    -   Warehouse Staff
+    -   Pharmacy/Clinic Staff
+-   **Business Owner:** Suraj UK
 
----
+## 3. Background
 
-# Implementation Phasing
+The existing Magento inventory manages stock only at the SKU level.
+Clinics require multiple batches for a single SKU, each with its own
+expiry date and available quantity. Inventory must be deducted from the
+batch with the earliest expiry date while maintaining complete batch
+traceability for auditing.
 
-This requirement is being delivered in two phases. Phase 1 (this implementation) covers
-core batch tracking, FEFO deduction, admin batch CRUD, and the GraphQL stock API. The
-following items described below are **deferred to Phase 2** and are not yet implemented:
+## 4. Scope
 
-- CSV/XLSX batch-wise inventory export (see "Inventory Export" section)
-- Reports with batch-level filtering and inventory visibility (see "Reports" section)
-- Frontend batch-number traceability on order-related pages (see "Reports" acceptance criteria)
+### In Scope
 
----
+-   Batch inventory management
+-   FEFO allocation
+-   Batch CRUD in Admin
+-   Batch validation
+-   Inventory transactions
+-   GraphQL stock support
+-   Batch traceability
+-   Batch status management
 
-# Objective
+### Out of Scope
 
-Implement a **Batch-Based Inventory Management** system using the **First Expiry, First Out (FEFO)** inventory strategy.
+-   Batch barcode printing
+-   Supplier purchase workflow
+-   Batch import automation
+-   Multi-warehouse enhancements
+-   Inventory forecasting
 
-Inventory must be managed by **SKU + Batch Number**, while customers continue purchasing products using only the SKU. Batch selection must happen automatically in the backend.
+## 5. Users and Roles
 
----
+  --------------------------------------------------------------------------
+  Role            Description                 Main Actions
+  --------------- --------------------------- ------------------------------
+  Administrator   Manage inventory batches    Add, Edit, Delete, Update
+                                              batches
 
-# Business Requirements
+  Store Manager   Monitor stock               View inventory, exports,
+                                              reports
 
-## Inventory Structure
+  Customer        Purchase products           Add products to cart without
+                                              selecting batches
+  --------------------------------------------------------------------------
 
-Each product (SKU) can have multiple inventory batches.
+## 6. Business Process
 
-Each batch must contain:
+### Current Process
 
-- SKU
-- Batch Number
-- Expiry Date
-- Available Quantity
+1.  Inventory maintained only by SKU.
+2.  No batch tracking.
+3.  No expiry-based allocation.
+4.  No batch traceability.
 
-Inventory uniqueness must be based on:
+### Proposed Process
 
-```
-SKU + Batch Number
-```
+1.  Admin creates batches.
+2.  Each SKU can have multiple batches.
+3.  FEFO selects the earliest valid batch.
+4.  Inventory deducts automatically.
+5.  Batch information is stored with the transaction.
 
-SKU itself is **not unique**.
+## 7. User Journeys
 
----
+### Journey 1 --- Admin Creates Batch
 
-# FEFO (First Expiry, First Out)
+**Actor:** Administrator
 
-Whenever inventory is deducted (checkout, dispensing, order creation, etc.):
+**Trigger:** New inventory arrives.
 
-1. Ignore expired batches.
-2. Find all batches for the SKU.
-3. Sort by Expiry Date (ascending).
-4. Select the earliest valid batch with available quantity.
-5. Deduct inventory from that batch.
-6. If quantity becomes zero, automatically continue with the next valid batch.
-7. Customers must never choose the batch manually.
+**Preconditions:** - Product exists. - User has inventory permissions.
 
----
+**Flow** 1. Open Batch Inventory. 2. Click Add Batch. 3. Enter SKU,
+Batch Number, Expiry Date and Quantity. 4. Save.
 
-# Checkout Behaviour
+**Expected Result:** Batch is created successfully.
 
-Do NOT introduce new Out of Stock behaviour.
+### Journey 2 --- Customer Purchases Product
 
-The existing checkout flow should continue to work.
+**Actor:** Customer
 
-Requirements:
+**Trigger:** Checkout
 
-- Product availability must continue following the existing business logic.
-- The FEFO engine should automatically select the correct batch.
-- If one batch becomes empty, the next valid batch should automatically be used.
-- No customer interaction is required.
+**Preconditions:** - SKU has available inventory. - At least one
+non-expired batch exists.
 
-Do not add any feature that forces products Out of Stock because an individual batch is empty.
+**Flow** 1. Customer adds SKU. 2. Checkout begins. 3. FEFO selects
+earliest valid batch. 4. Inventory deducted. 5. Batch saved on order.
 
----
+**Expected Result:** Customer purchases successfully without choosing a
+batch.
 
-# Expired Batch Rules
+## 8. Business Rules
 
-Expired batches:
+  -----------------------------------------------------------------------
+  Rule ID           Rule              Priority          Notes
+  ----------------- ----------------- ----------------- -----------------
+  BR-001            Inventory         Must Have         Duplicate batches
+                    uniqueness =                        not allowed
+                    SKU + Batch                         
+                    Number                              
 
-- cannot be sold
-- cannot be allocated
-- cannot be selected by FEFO
-- must remain visible in Admin
-- should be clearly marked as Expired
+  BR-002            FEFO selects      Must Have         Ignore expired
+                    earliest valid                      batches
+                    expiry                              
 
----
+  BR-003            Customers cannot  Must Have         Backend only
+                    choose batches                      
 
-# Admin Requirements
+  BR-004            Expired batches   Must Have         Visible in Admin
+                    cannot be sold                      
 
-## Batch Inventory List
+  BR-005            Auto switch to    Must Have         
+                    next batch when                     
+                    quantity reaches                    
+                    zero                                
+  -----------------------------------------------------------------------
 
-Create an Admin screen for batch inventory.
+## 9. Validation Rules
 
-Display:
+  Validation ID   Field          Validation           Expected Error Message
+  --------------- -------------- -------------------- --------------------------
+  VAL-001         Batch Number   Mandatory            Batch Number is required
+  VAL-002         Expiry Date    Mandatory            Expiry Date is required
+  VAL-003         Quantity       Cannot be negative   Invalid quantity
+  VAL-004         SKU + Batch    Must be unique       Duplicate batch exists
 
-- SKU
-- Product Name
-- Batch Number
-- Expiry Date
-- Available Quantity
-- Status (Active / Expired)
-- Last Updated
+## 10. Data Requirements
 
-Support:
+  Data Item              Required Source    Validation       Notes
+  -------------------- ---------- --------- ---------------- -------------
+  SKU                         Yes Product   Must exist       Product SKU
+  Batch Number                Yes Admin     Unique per SKU   
+  Expiry Date                 Yes Admin     Valid date       
+  Available Quantity          Yes Admin     \>=0             
+  Status                      Yes System    Active/Expired   
 
-- Pagination
-- Search
-- Sorting
-- Filters
+## 11. Statuses and State Changes
 
-Filters:
+  Current Status   Action                  New Status   Conditions
+  ---------------- ----------------------- ------------ -----------------------------
+  Active           Expiry reached          Expired      Current date exceeds expiry
+  Active           Quantity becomes zero   Empty        Quantity = 0
 
-- SKU
-- Batch Number
-- Product
-- Expiry Date
-- Status
+## 12. Notifications and Messages
 
----
+  Trigger            Recipient   Channel   Message / Template
+  ------------------ ----------- --------- -----------------------------
+  Duplicate Batch    Admin       UI        Batch already exists
+  Invalid Quantity   Admin       UI        Quantity cannot be negative
 
-## Batch Inventory CRUD
+## 13. Error Scenarios
 
-Admin must be able to:
+  Scenario          Expected Behaviour   User Message
+  ----------------- -------------------- ---------------------------
+  Duplicate batch   Prevent save         Batch already exists
+  No valid batch    Block allocation     Product is unavailable
+  Expired batch     Ignore batch         Next valid batch selected
 
-- View batches
-- Add batch
-- Edit batch
-- Update quantity
-- Update expiry date
-- Delete batch (if business rules allow)
+## 14. Positive Scenarios
 
-Validation:
+  Scenario                 Expected Result
+  ------------------------ --------------------------
+  Multiple valid batches   Earliest expiry selected
+  Current batch empty      Next batch selected
+  New batch created        Available for FEFO
 
-- SKU + Batch Number must be unique.
-- Quantity cannot be negative.
-- Expiry date is mandatory.
-- Batch Number is mandatory.
+## 15. Edge Cases
 
----
+-   Multiple batches with same expiry.
+-   Partial deduction across batches.
+-   All batches expired.
+-   Concurrent orders.
 
-# Inventory Export
+## 16. Reporting and Audit Requirements
 
-Provide batch-wise inventory export.
+-   Audit batch creation, updates and deductions.
+-   Batch inventory reports.
+-   CSV/XLSX export.
 
-Supported formats:
+## 17. Security and Compliance Requirements
 
-- CSV
-- Excel (XLSX)
+-   Only authorized administrators can manage batches.
+-   Maintain audit history.
+-   Company-level data isolation where applicable.
 
-Columns:
+## 18. Business Acceptance Criteria
 
-- SKU
-- Product Name
-- Batch Number
-- Expiry Date
-- Available Quantity
-- Reserved Quantity (if applicable)
-- Status
-- Last Updated
+### AC-001 --- FEFO Allocation
 
-Export should support current filters.
+**Given** a SKU has multiple valid batches.
 
----
+**When** a customer purchases the product.
 
-# Frontend Requirements
+**Then** the earliest expiry batch is automatically selected.
 
-Customers continue purchasing products normally.
+## 19. Assumptions
 
-No batch selection UI is required.
+-   Magento inventory is enabled.
+-   Products already exist.
 
-However, Batch Number should be visible wherever it improves traceability.
+## 20. Dependencies
 
-Display Batch Number on:
+-   Magento Inventory
+-   Product Catalog
+-   Order Management
+-   GraphQL
 
-- Order Details
-- Invoice
-- Shipment
-- Admin Order View
-- Dispensing History
-- Customer Order History (if applicable)
+## 21. Open Questions
 
-This helps clinic staff identify the exact medicine batch that was dispensed.
+  --------------------------------------------------------------------------
+  Question ID    Question       Owner          Status         Decision
+  -------------- -------------- -------------- -------------- --------------
+  Q-001          Should empty   Business       Open           Yes
+                 batches remain                               
+                 visible in                                   
+                 reports?                                     
 
----
+  --------------------------------------------------------------------------
 
-# Inventory Transactions
+## 22. Business Definition of Done
 
-Every inventory transaction must store:
-
-- SKU
-- Batch Number
-- Quantity
-- Transaction Type
-- Order ID (if applicable)
-- User
-- Timestamp
-
-This is required for auditing and traceability.
-
----
-
-# Reports
-
-Reports must support:
-
-- SKU
-- Product
-- Batch Number
-- Expiry Date
-- Remaining Quantity
-- Available Quantity
-- Active Batches
-- Expired Batches
-
-Filters:
-
-- SKU
-- Batch
-- Product
-- Expiry Date
-- Status
-
----
-
-# Example
-
-Current Inventory
-
-| SKU | Batch | Expiry | Qty |
-|-----|-------|---------|----:|
-| TAB-001 | B001 | 2026-09-30 | 50 |
-| TAB-001 | B002 | 2027-02-28 | 100 |
-
-Customer purchases 20.
-
-Result:
-
-B001 → 30
-
-Customer purchases another 30.
-
-Result:
-
-B001 → 0
-
-Customer purchases 10.
-
-Result:
-
-B002 → 90
-
-No manual batch selection.
-
----
-
-# Acceptance Criteria
-
-- Inventory is managed by SKU + Batch Number.
-- FEFO allocation always uses the earliest valid expiry date.
-- Expired batches are never allocated.
-- Customers never choose batches.
-- Automatic switch to the next batch when current batch is empty.
-- Existing checkout behaviour remains unchanged.
-- Admin can manage batches.
-- Admin can export batch-wise inventory.
-- Batch Number is stored with every inventory transaction.
-- Batch Number is visible in frontend order-related pages for traceability.
-- Reports support batch-level filtering and inventory visibility.
-
----
-
-# Technical Notes
-
-- Follow Magento 2 coding standards.
-- Use Service Contracts where applicable.
-- Avoid modifying Magento core.
-- Use Dependency Injection.
-- Follow repository pattern.
-- Maintain backward compatibility.
-- Ensure implementation supports future multi-source inventory (MSI) integration if required.
-- Write unit and integration tests where applicable.
-- Ensure inventory deduction is transactional to avoid race conditions during concurrent orders.
+-   FEFO allocation implemented.
+-   Batch management completed.
+-   Admin CRUD available.
+-   Acceptance criteria approved.
