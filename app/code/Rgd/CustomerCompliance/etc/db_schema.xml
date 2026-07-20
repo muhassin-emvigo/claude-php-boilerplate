@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="rgd_customercompliance_group_config" resource="default" engine="innodb" comment="Customer Compliance Group Config">
+        <column xsi:type="int" name="config_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Config ID"/>
+        <column xsi:type="smallint" name="customer_group_id" padding="5" unsigned="true" nullable="false" identity="false" comment="Customer Group ID"/>
+        <column xsi:type="smallint" name="is_approval_required" padding="1" unsigned="false" nullable="false" identity="false" default="0" comment="Is Approval Required"/>
+        <column xsi:type="smallint" name="is_registration_fields_enabled" padding="1" unsigned="false" nullable="false" identity="false" default="1" comment="Is Registration Fields Enabled"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="config_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CUSTOMER_GROUP_ID">
+            <column name="customer_group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CUSTOMER_GROUP_ID_CUSTOMER_GROUP_CUSTOMER_GROUP_ID"
+                    table="rgd_customercompliance_group_config" column="customer_group_id"
+                    referenceTable="customer_group" referenceColumn="customer_group_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="rgd_customercompliance_field" resource="default" engine="innodb" comment="Customer Compliance Field">
+        <column xsi:type="int" name="field_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Field ID"/>
+        <column xsi:type="int" name="config_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Config ID"/>
+        <column xsi:type="varchar" name="field_code" nullable="false" length="64" comment="Field Code"/>
+        <column xsi:type="varchar" name="field_type" nullable="false" length="20" comment="Field Type"/>
+        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="smallint" name="is_required" padding="1" unsigned="false" nullable="true" identity="false" default="0" comment="Is Required"/>
+        <column xsi:type="int" name="sort_order" padding="10" unsigned="true" nullable="true" identity="false" default="0" comment="Sort Order"/>
+        <column xsi:type="text" name="options_json" nullable="true" comment="Options JSON"/>
+        <column xsi:type="varchar" name="allowed_extensions" nullable="true" length="255" comment="Allowed Extensions"/>
+        <column xsi:type="int" name="max_file_size_kb" padding="10" unsigned="true" nullable="true" identity="false" comment="Max File Size KB"/>
+        <column xsi:type="int" name="version" padding="10" unsigned="true" nullable="true" identity="false" default="1" comment="Version"/>
+        <column xsi:type="smallint" name="is_active" padding="1" unsigned="false" nullable="true" identity="false" default="1" comment="Is Active"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="field_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_FIELD_CODE_VERSION">
+            <column name="config_id"/>
+            <column name="field_code"/>
+            <column name="version"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CONFIG_ID"
+                    table="rgd_customercompliance_field" column="config_id"
+                    referenceTable="rgd_customercompliance_group_config" referenceColumn="config_id" onDelete="CASCADE"/>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_IS_ACTIVE_SORT_ORDER" indexType="btree">
+            <column name="config_id"/>
+            <column name="is_active"/>
+            <column name="sort_order"/>
+        </index>
+    </table>
+
+    <table name="rgd_customercompliance_document" resource="default" engine="innodb" comment="Customer Compliance Document">
+        <column xsi:type="int" name="document_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Document ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Customer ID"/>
+        <column xsi:type="int" name="field_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Field ID"/>
+        <column xsi:type="int" name="order_id" padding="10" unsigned="true" nullable="true" identity="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="file_name" nullable="false" length="255" comment="File Name"/>
+        <column xsi:type="varchar" name="file_path" nullable="false" length="500" comment="File Path"/>
+        <column xsi:type="varchar" name="content_type" nullable="false" length="127" comment="Content Type"/>
+        <column xsi:type="int" name="file_size" padding="10" unsigned="true" nullable="false" identity="false" comment="File Size"/>
+        <column xsi:type="int" name="version" padding="10" unsigned="true" nullable="true" identity="false" default="1" comment="Version"/>
+        <column xsi:type="smallint" name="is_current" padding="1" unsigned="false" nullable="true" identity="false" default="1" comment="Is Current"/>
+        <column xsi:type="varchar" name="checksum" nullable="false" length="64" comment="Checksum"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="document_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="rgd_customercompliance_document" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_FIELD_ID_RGD_CUSTOMERCOMPLIANCE_FIELD_FIELD_ID"
+                    table="rgd_customercompliance_document" column="field_id"
+                    referenceTable="rgd_customercompliance_field" referenceColumn="field_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="rgd_customercompliance_document" column="order_id"
+                    referenceTable="sales_order" referenceColumn="entity_id" onDelete="SET NULL"/>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CUSTOMER_ID_FIELD_ID_IS_CURRENT" indexType="btree">
+            <column name="customer_id"/>
+            <column name="field_id"/>
+            <column name="is_current"/>
+        </index>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CHECKSUM" indexType="btree">
+            <column name="checksum"/>
+        </index>
+    </table>
+
+    <table name="rgd_customercompliance_field_value" resource="default" engine="innodb" comment="Customer Compliance Field Value">
+        <column xsi:type="int" name="value_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Value ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Customer ID"/>
+        <column xsi:type="int" name="field_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Field ID"/>
+        <column xsi:type="text" name="value" nullable="true" comment="Value"/>
+        <column xsi:type="int" name="document_id" padding="10" unsigned="true" nullable="true" identity="false" comment="Document ID"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="value_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_CUSTOMER_ID_FIELD_ID">
+            <column name="customer_id"/>
+            <column name="field_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="rgd_customercompliance_field_value" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_FIELD_ID_RGD_CUSTOMERCOMPLIANCE_FIELD_FIELD_ID"
+                    table="rgd_customercompliance_field_value" column="field_id"
+                    referenceTable="rgd_customercompliance_field" referenceColumn="field_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_DOCUMENT_ID_RGD_CUSTOMERCOMPLIANCE_DOCUMENT_DOCUMENT_ID"
+                    table="rgd_customercompliance_field_value" column="document_id"
+                    referenceTable="rgd_customercompliance_document" referenceColumn="document_id" onDelete="SET NULL"/>
+    </table>
+
+    <table name="rgd_customercompliance_order_approval" resource="default" engine="innodb" comment="Customer Compliance Order Approval">
+        <column xsi:type="int" name="approval_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Approval ID"/>
+        <column xsi:type="int" name="order_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Order ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Customer ID"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending_verification" comment="Status"/>
+        <column xsi:type="int" name="reviewer_admin_id" padding="10" unsigned="true" nullable="true" identity="false" comment="Reviewer Admin ID"/>
+        <column xsi:type="text" name="decision_notes" nullable="true" comment="Decision Notes"/>
+        <column xsi:type="timestamp" name="decision_at" on_update="false" nullable="true" comment="Decision At"/>
+        <column xsi:type="varchar" name="refund_status" nullable="true" length="20" comment="Refund Status"/>
+        <column xsi:type="varchar" name="refund_reference" nullable="true" length="128" comment="Refund Reference"/>
+        <column xsi:type="int" name="resubmission_count" padding="10" unsigned="true" nullable="true" identity="false" default="0" comment="Resubmission Count"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="approval_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_ORDER_ID">
+            <column name="order_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="rgd_customercompliance_order_approval" column="order_id"
+                    referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="rgd_customercompliance_order_approval" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_REVIEWER_ADMIN_ID_ADMIN_USER_USER_ID"
+                    table="rgd_customercompliance_order_approval" column="reviewer_admin_id"
+                    referenceTable="admin_user" referenceColumn="user_id" onDelete="SET NULL"/>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+    </table>
+
+    <table name="rgd_customercompliance_audit_log" resource="default" engine="innodb" comment="Customer Compliance Audit Log">
+        <column xsi:type="bigint" name="log_id" padding="20" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="varchar" name="actor_type" nullable="false" length="20" comment="Actor Type"/>
+        <column xsi:type="int" name="actor_id" padding="10" unsigned="true" nullable="true" identity="false" comment="Actor ID"/>
+        <column xsi:type="varchar" name="action" nullable="false" length="64" comment="Action"/>
+        <column xsi:type="varchar" name="entity_type" nullable="false" length="64" comment="Entity Type"/>
+        <column xsi:type="varchar" name="entity_id" nullable="false" length="64" comment="Entity ID"/>
+        <column xsi:type="text" name="notes" nullable="true" comment="Notes"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_ENTITY_TYPE_ENTITY_ID" indexType="btree">
+            <column name="entity_type"/>
+            <column name="entity_id"/>
+        </index>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_ACTION" indexType="btree">
+            <column name="action"/>
+        </index>
+        <index referenceId="RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+</schema>

@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Group Config -->
+    <route url="/V1/customer-compliance/group-configs" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::group_config"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/group-configs/:configId" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::group_config"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/group-configs" method="POST">
+        <service class="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::group_config"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/group-configs/:configId" method="PUT">
+        <service class="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::group_config"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/group-configs/:configId" method="DELETE">
+        <service class="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" method="deleteById"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::group_config"/>
+        </resources>
+    </route>
+
+    <!-- Fields -->
+    <route url="/V1/customer-compliance/fields" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::field"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/fields/:fieldId" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::field"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/fields" method="POST">
+        <service class="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::field"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/fields/:fieldId" method="PUT">
+        <service class="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::field"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/fields/:fieldId" method="DELETE">
+        <service class="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" method="deleteById"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::field"/>
+        </resources>
+    </route>
+
+    <!-- Field config lookups -->
+    <route url="/V1/customer-compliance/fields/for-group/:customerGroupId" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\FieldConfigProviderInterface" method="getFieldsForGroup"/>
+        <resources>
+            <resource ref="self"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/eligible-groups" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\FieldConfigProviderInterface" method="getEligibleGroups"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Approvals -->
+    <route url="/V1/customer-compliance/approvals" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\OrderApprovalRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::approvals"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/approvals/:approvalId" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\OrderApprovalRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::approvals"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/approvals/:approvalId/approve" method="POST">
+        <service class="Rgd\CustomerCompliance\Api\OrderApprovalServiceInterface" method="approve"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::approve"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/approvals/:approvalId/reject" method="POST">
+        <service class="Rgd\CustomerCompliance\Api\OrderApprovalServiceInterface" method="reject"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::reject"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/approvals/:approvalId/retry-refund" method="POST">
+        <service class="Rgd\CustomerCompliance\Api\OrderApprovalServiceInterface" method="retryRefund"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::reject"/>
+        </resources>
+    </route>
+
+    <!-- Documents -->
+    <route url="/V1/customer-compliance/documents" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\DocumentRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::documents"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/documents/:documentId" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\DocumentRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="self"/>
+        </resources>
+    </route>
+    <route url="/V1/customer-compliance/documents/:documentId/download" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\DocumentStorageServiceInterface" method="getSecureUrl"/>
+        <resources>
+            <resource ref="self"/>
+        </resources>
+    </route>
+
+    <!-- Audit Log -->
+    <route url="/V1/customer-compliance/audit-logs" method="GET">
+        <service class="Rgd\CustomerCompliance\Api\AuditLogRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="Rgd_CustomerCompliance::audit"/>
+        </resources>
+    </route>
+</routes>

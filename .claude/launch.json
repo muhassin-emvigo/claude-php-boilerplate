@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mysql",
+      "runtimeExecutable": "C:\\xampppp\\mysql\\bin\\mysqld.exe",
+      "runtimeArgs": ["--standalone", "--console"],
+      "port": 3306
+    },
+    {
+      "name": "opensearch",
+      "runtimeExecutable": "C:\\opensearch\\opensearch-2.11.0\\bin\\opensearch.bat",
+      "runtimeArgs": [],
+      "port": 9200
+    },
+    {
+      "name": "apache",
+      "runtimeExecutable": "C:\\xampppp\\apache\\bin\\httpd.exe",
+      "runtimeArgs": [],
+      "port": 80
+    }
+  ]
+}

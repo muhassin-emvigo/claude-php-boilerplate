@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Rgd_CustomerCompliance::compliance" title="Compliance" translate="title" module="Rgd_CustomerCompliance" sortOrder="100" parent="Magento_Customer::customer" resource="Rgd_CustomerCompliance::compliance"/>
+        <add id="Rgd_CustomerCompliance::group_config" title="Group Configuration" translate="title" module="Rgd_CustomerCompliance" sortOrder="10" parent="Rgd_CustomerCompliance::compliance" action="customercompliance/groupconfig/index" resource="Rgd_CustomerCompliance::group_config"/>
+        <add id="Rgd_CustomerCompliance::field" title="Compliance Fields" translate="title" module="Rgd_CustomerCompliance" sortOrder="20" parent="Rgd_CustomerCompliance::compliance" action="customercompliance/field/index" resource="Rgd_CustomerCompliance::field"/>
+        <add id="Rgd_CustomerCompliance::approvals" title="Pending Verification" translate="title" module="Rgd_CustomerCompliance" sortOrder="30" parent="Rgd_CustomerCompliance::compliance" action="customercompliance/approval/index" resource="Rgd_CustomerCompliance::approvals"/>
+        <add id="Rgd_CustomerCompliance::audit" title="Audit Log" translate="title" module="Rgd_CustomerCompliance" sortOrder="40" parent="Rgd_CustomerCompliance::compliance" action="customercompliance/audit/index" resource="Rgd_CustomerCompliance::audit"/>
+    </menu>
+</config>

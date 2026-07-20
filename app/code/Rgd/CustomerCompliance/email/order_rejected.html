@@ -1,0 +1,45 @@
+<!--@subject Update on Your Order #{{var order_increment_id}} @-->
+<!--@vars {"var customer_name":"Customer Name", "var order_increment_id":"Order Increment Id", "var decision_notes":"Decision Notes", "var resubmit_url":"Resubmit Url"} @-->
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; background-color:#ffffff;">
+    <tr>
+        <td style="padding:20px 30px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.6; color:#333333;">
+            <p style="margin:0 0 16px 0;">Dear {{var customer_name}},</p>
+
+            <p style="margin:0 0 16px 0;">
+                We were unable to verify your submitted documents for order #{{var order_increment_id}}, and the
+                order could not be approved at this time.
+            </p>
+
+            <p style="margin:0 0 16px 0;">
+                We were unable to verify your submitted documents for the following reason:
+            </p>
+
+            <table cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; margin:0 0 16px 0; background-color:#f7f7f7; border:1px solid #e0e0e0;">
+                <tr>
+                    <td style="padding:12px 16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.6; color:#333333;">
+                        {{var decision_notes}}
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin:0 0 16px 0;">
+                A refund for this order has been initiated and will be processed to your original payment method.
+            </p>
+
+            <p style="margin:0 0 16px 0;">
+                You may update your documents by visiting the link below and resubmitting for review.
+            </p>
+
+            <table cellspacing="0" cellpadding="0" border="0" style="margin:0 0 16px 0;">
+                <tr>
+                    <td style="border-radius:3px; background-color:#333333;">
+                        <a href="{{var resubmit_url}}" target="_blank" style="display:inline-block; padding:10px 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#ffffff; text-decoration:none;">Review and Resubmit Documents</a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin:24px 0 0 0;">Thank you,<br />Customer Service</p>
+        </td>
+    </tr>
+</table>

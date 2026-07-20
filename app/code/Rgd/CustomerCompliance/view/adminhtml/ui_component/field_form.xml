@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Compliance Field edit/new form. Always scoped to an owning Group Config via "config_id"
+    (see Controller\Adminhtml\Field\Edit, which requires config_id for new fields and registers
+    it, and Ui\DataProvider\FieldDataProvider, which filters its collection by the same param).
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_field_form.rgd_customercompliance_field_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Compliance Field</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Rgd\CustomerCompliance\Block\Adminhtml\Field\Edit\BackButton"/>
+            <button name="save" class="Rgd\CustomerCompliance\Block\Adminhtml\Field\Edit\SaveButton"/>
+        </buttons>
+        <namespace>rgd_customercompliance_field_form</namespace>
+        <!--
+            Empty dataScope: fields post as flat top-level request params (label, field_type,
+            is_required, sort_order, config_id, options, ...), matching what
+            Controller\Adminhtml\Field\Save reads via $this->getRequest()->getParams().
+        -->
+        <dataScope></dataScope>
+        <deps>
+            <dep>rgd_customercompliance_field_form.rgd_customercompliance_field_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_field_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\FieldDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_field_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">field_id</argument>
+            <argument name="requestFieldName" xsi:type="string">field_id</argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <!--
+                REAL Magento mechanism: passing "*" as a submitUrl param value tells the url
+                builder to substitute the CURRENT request's param of that same name (the
+                admin-URL equivalent of $this->getUrl('*/*/*', ['config_id' => '*'])). This is
+                what actually guarantees "config_id" survives the round trip into
+                Controller\Adminhtml\Field\Save's $this->getRequest()->getParams(), independent
+                of whatever the hidden "config_id" field below happens to hold client-side (see
+                that field's own NOTE for why its initial value can't be reliably guaranteed for
+                a brand-new/unsaved field).
+            -->
+            <submitUrl path="customercompliance/field/save">
+                <param name="config_id" xsi:type="string">*</param>
+            </submitUrl>
+        </settings>
+    </dataSource>
+    <fieldset name="field_fieldset">
+        <settings>
+            <label translate="true">Field Details</label>
+        </settings>
+        <field name="field_id" formElement="input" sortOrder="5">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="visible" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+        <!--
+            "field_code" is NOT NULL + part of the "config_id + field_code + version" unique
+            constraint (see etc/db_schema.xml) - this input closes the previously-flagged gap
+            where the form had no field_code control at all, so every new field would save with
+            an empty field_code and collide with the second field created under the same config.
+            Controller\Adminhtml\Field\Save also now slugifies from "label" as a server-side
+            safety net if this is ever left blank (e.g. a future API caller), but the admin form
+            should always post an explicit value here.
+        -->
+        <field name="field_code" formElement="input" sortOrder="15">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Field Code</label>
+                <dataScope>field_code</dataScope>
+                <notice translate="true">
+                    Unique per group config, e.g. "medical_license_number". Letters, numbers, and
+                    underscores only. Used internally to identify this field; not shown to
+                    customers.
+                </notice>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-code" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="config_id" formElement="input" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="visible" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <visible>false</visible>
+                <dataScope>config_id</dataScope>
+            </settings>
+        </field>
+        <field name="label" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Label</label>
+                <dataScope>label</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="field_type" formElement="select" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--
+                        Broadcasts the selected field type so the conditional
+                        options/file-upload sections below can react to it client-side, mirroring
+                        group_config_form.xml's is_approval_required "exports" convention (its
+                        own dataScope already writes to data.field_type; this export exists for
+                        parity/clarity with that established pattern).
+                    -->
+                    <item name="exports" xsi:type="array">
+                        <item name="value" xsi:type="string">${ $.provider }:data.field_type</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Field Type</label>
+                <dataScope>field_type</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Rgd\CustomerCompliance\Model\Config\Source\FieldType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="is_required" formElement="checkbox" sortOrder="40">
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Required</label>
+                <dataScope>is_required</dataScope>
+                <valueMap>
+                    <map name="false" xsi:type="string">0</map>
+                    <map name="true" xsi:type="string">1</map>
+                </valueMap>
+                <default>0</default>
+            </settings>
+        </field>
+        <field name="sort_order" formElement="input" sortOrder="50">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Sort Order</label>
+                <dataScope>sort_order</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+    <!--
+        Conditional fieldset: only meaningful for the choice-type field types
+        (Model\Config\Source\FieldType::OPTION_BEARING_TYPES = dropdown/radio/checkbox).
+
+        APPROXIMATION: Ui/Component's declarative "imports" wiring binds a target property
+        directly to a single source value - it doesn't have a built-in "value is one of
+        [a,b,c]" set-membership operator. Binding this fieldset's "visible" straight to
+        "${ $.provider }:data.field_type" (as done below) means it will show for *any*
+        non-empty field_type selection, not only dropdown/radio/checkbox. Achieving exact
+        set-membership visibility client-side would need a small custom Ui/Component JS
+        mixin/"switcher" (the way core modules like Magento_Bundle do it for their own
+        type-dependent option fields) computing a derived boolean - out of scope here since no
+        JS file was requested. Authoritative enforcement is server-side regardless:
+        Controller\Adminhtml\Field\Save already blocks saving a dropdown/radio/checkbox field
+        with zero options (its "OPTION_REQUIRING_TYPES" check), so a mismatch here is a cosmetic
+        UX gap (the fieldset may show/hide too eagerly), not a data-integrity risk.
+    -->
+    <fieldset name="field_options_fieldset">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="imports" xsi:type="array">
+                    <item name="visible" xsi:type="string">${ $.provider }:data.field_type</item>
+                </item>
+            </item>
+        </argument>
+        <settings>
+            <label translate="true">Options</label>
+            <notice translate="true">
+                Only used for Dropdown, Radio Buttons, and Checkbox Group field types. At least
+                one option is required for those types.
+            </notice>
+        </settings>
+        <container name="options" component="Magento_Ui/js/dynamic-rows/dynamic-rows" template="ui/dynamic-rows/templates/default">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="addButtonLabel" xsi:type="string" translate="true">Add Option</item>
+                    <item name="componentType" xsi:type="string">dynamicRows</item>
+                    <item name="dndConfig" xsi:type="array">
+                        <item name="enabled" xsi:type="boolean">false</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <!--
+                    dataScope "options" (not "options_json"): Controller\Adminhtml\Field\Save
+                    reads the posted array from $data['options'] and passes it straight to
+                    Field::setOptions(), which json_encode()s it into the options_json column.
+                -->
+                <dataScope>options</dataScope>
+                <label translate="true">Options</label>
+            </settings>
+            <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="isTemplate" xsi:type="boolean">true</item>
+                        <item name="is_collection" xsi:type="boolean">true</item>
+                        <item name="componentType" xsi:type="string">container</item>
+                    </item>
+                </argument>
+                <field name="option_label" formElement="input" sortOrder="10">
+                    <settings>
+                        <dataType>text</dataType>
+                        <label translate="true">Option Label</label>
+                    </settings>
+                </field>
+                <field name="option_value" formElement="input" sortOrder="20">
+                    <settings>
+                        <dataType>text</dataType>
+                        <label translate="true">Option Value</label>
+                    </settings>
+                </field>
+            </container>
+        </container>
+    </fieldset>
+    <!--
+        Conditional fieldset: only meaningful for file-upload field types
+        (Model\Config\Source\FieldType::FILE_TYPES = file/image). Same imports/visible
+        approximation caveat as field_options_fieldset above applies here.
+    -->
+    <fieldset name="field_file_fieldset">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="imports" xsi:type="array">
+                    <item name="visible" xsi:type="string">${ $.provider }:data.field_type</item>
+                </item>
+            </item>
+        </argument>
+        <settings>
+            <label translate="true">File Upload Settings</label>
+            <notice translate="true">Only used for File Upload and Image Upload field types.</notice>
+        </settings>
+        <field name="allowed_extensions" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Allowed Extensions</label>
+                <dataScope>allowed_extensions</dataScope>
+                <notice translate="true">Comma-separated list, e.g. "pdf,jpg,png".</notice>
+            </settings>
+        </field>
+        <field name="max_file_size_kb" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Max File Size (KB)</label>
+                <dataScope>max_file_size_kb</dataScope>
+                <validation>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+</form>

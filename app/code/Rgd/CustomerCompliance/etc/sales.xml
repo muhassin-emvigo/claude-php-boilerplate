@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <order>
+        <statuses>
+            <status code="pending_verification" translate="label" module="Rgd_CustomerCompliance">
+                <label>Pending Verification</label>
+            </status>
+        </statuses>
+        <states>
+            <state code="pending_verification" translate="label">
+                <label>Pending Verification</label>
+                <statuses>
+                    <status code="pending_verification" default="true"/>
+                </statuses>
+                <visibleOnFront>1</visibleOnFront>
+            </state>
+        </states>
+    </order>
+</config>

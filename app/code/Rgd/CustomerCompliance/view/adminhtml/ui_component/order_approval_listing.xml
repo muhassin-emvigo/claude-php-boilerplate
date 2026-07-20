@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Order Approvals ("Pending Verification") grid.
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_order_approval_listing.rgd_customercompliance_order_approval_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>rgd_customercompliance_order_approval_columns</spinner>
+        <deps>
+            <dep>rgd_customercompliance_order_approval_listing.rgd_customercompliance_order_approval_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_order_approval_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\OrderApprovalDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_order_approval_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">approval_id</argument>
+            <argument name="requestFieldName" xsi:type="string">approval_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">approval_id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <massaction name="listing_massaction">
+            <settings>
+                <indexField>approval_id</indexField>
+            </settings>
+            <!--
+                Per the Design doc's decision (also documented on
+                Ui\Component\Listing\Column\OrderApprovalActions): only "Approve" is offered as
+                a bulk action here. "Reject" always requires mandatory decision notes supplied
+                on the detail page, so it is intentionally NOT offered as a massaction.
+
+                Wired to the dedicated Controller\Adminhtml\Approval\MassApprove controller
+                (not the single-row Approve controller), which resolves Magento's standard
+                massaction "selected"/"selected_all" payload via Magento\Ui\Component\MassAction\Filter
+                and approves each resolved row - fixing the previous gap where this pointed at
+                Approve.php, which only understood a single "approval_id" param.
+            -->
+            <action name="approve">
+                <settings>
+                    <url path="customercompliance/approval/massApprove"/>
+                    <type>approve</type>
+                    <label translate="true">Approve</label>
+                </settings>
+            </action>
+        </massaction>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="rgd_customercompliance_order_approval_columns">
+        <column name="approval_id">
+            <settings>
+                <filter>textRange</filter>
+                <sorting>desc</sorting>
+                <label translate="true">ID</label>
+            </settings>
+        </column>
+        <!--
+            order_increment_id / customer_email / customer_group_label are not native columns of
+            rgd_customercompliance_order_approval - they're appended per-row by
+            Ui\DataProvider\OrderApprovalDataProvider::addOrderDisplayFields() (see that class's
+            own NOTE re: the N+1 order/group lookup). They're plain text columns here (no
+            options-source class exists for a "select"-style filter against them).
+        -->
+        <column name="order_increment_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Order #</label>
+            </settings>
+        </column>
+        <column name="customer_email">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer Email</label>
+            </settings>
+        </column>
+        <column name="customer_group_label">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer Group</label>
+            </settings>
+        </column>
+        <!--
+            Plain text column: there is no status-pill renderer/JS component anywhere in this
+            module yet (Block\Order\ApprovalStatus / templates/order/approval_status.phtml are
+            frontend-only storefront display, not an admin grid column renderer), so per the
+            task's own fallback instruction this is left as an unstyled value rather than adding
+            a new renderer class out of scope for this pass.
+        -->
+        <column name="status">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Status</label>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Submitted</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Rgd\CustomerCompliance\Ui\Component\Listing\Column\OrderApprovalActions">
+            <settings>
+                <indexField>approval_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>140</resizeDefaultWidth>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

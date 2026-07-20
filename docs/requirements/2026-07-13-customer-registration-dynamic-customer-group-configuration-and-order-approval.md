@@ -1,5 +1,7 @@
 # Customer Registration, Dynamic Customer Group Configuration & Order Approval --- Business Requirements
 
+**Status:** In Progress (running `/full-flow` — see `docs/progress-customer-registration-dynamic-customer-group-configuration-and-order-approval.md`)
+
 ## 1. Purpose
 
 Implement a configurable customer registration and order approval system

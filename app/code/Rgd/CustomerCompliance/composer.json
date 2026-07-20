@@ -1,0 +1,27 @@
+{
+    "name": "rgd/module-customer-compliance",
+    "description": "Customer compliance registration fields, document uploads, and order verification workflow for Magento 2.",
+    "type": "magento2-module",
+    "license": [
+        "proprietary"
+    ],
+    "require": {
+        "php": "~8.2||~8.3",
+        "magento/framework": "*",
+        "magento/module-customer": "*",
+        "magento/module-sales": "*",
+        "magento/module-email": "*",
+        "magento/module-ui": "*"
+    },
+    "suggest": {
+        "razorpay/magento": "^4.2 - Enables online refund via Razorpay if installed"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Rgd\\CustomerCompliance\\": ""
+        }
+    }
+}

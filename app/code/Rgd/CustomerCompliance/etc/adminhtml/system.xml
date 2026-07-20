@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="customercompliance" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Customer Compliance</label>
+            <tab>customer</tab>
+            <resource>Rgd_CustomerCompliance::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="max_upload_size_kb" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Max Upload Size (KB)</label>
+                    <comment>Default maximum file size, in kilobytes, allowed for compliance document uploads when a field does not define its own limit.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

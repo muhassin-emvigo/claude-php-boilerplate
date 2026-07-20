@@ -4,6 +4,13 @@
 This is a Magento 2.4.x PHP module development workspace with Claude Code integration.
 It provides a standardized skeleton, quality tooling, and AI-assisted workflows.
 
+## AI Optimization (Required)
+
+For **every `.md` file** (requirements, BRD, technical specs, progress, tasks, implementation plans, etc.), always enable the following before processing:
+
+- Minimize token usage, avoid unnecessary explanations, and keep reasoning concise.
+- Store and reuse important project context instead of repeating it across prompts.
+
 ## Tech Stack
 - **PHP**: 8.2+ with strict_types
 - **Framework**: Magento 2.4.x (Adobe Commerce / Open Source)

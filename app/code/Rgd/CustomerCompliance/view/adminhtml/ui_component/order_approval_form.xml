@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Order Approval detail / decision view. Read-mostly: the only field a reviewer actually
+    edits here is "decision_notes"; everything else is a disabled/read-only display field.
+    Decisions themselves are posted by the Approve/Reject/Retry-Refund buttons declared below
+    (see Block\Adminhtml\Approval\View\{ApproveButton,RejectButton,RetryRefundButton}), not by
+    a generic form "Save".
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_order_approval_form.rgd_customercompliance_order_approval_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Order Approval</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Rgd\CustomerCompliance\Block\Adminhtml\Approval\View\BackButton"/>
+            <button name="retry_refund" class="Rgd\CustomerCompliance\Block\Adminhtml\Approval\View\RetryRefundButton"/>
+            <button name="reject" class="Rgd\CustomerCompliance\Block\Adminhtml\Approval\View\RejectButton"/>
+            <button name="approve" class="Rgd\CustomerCompliance\Block\Adminhtml\Approval\View\ApproveButton"/>
+        </buttons>
+        <namespace>rgd_customercompliance_order_approval_form</namespace>
+        <dataScope></dataScope>
+        <deps>
+            <dep>rgd_customercompliance_order_approval_form.rgd_customercompliance_order_approval_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_order_approval_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <!--
+                Reuses the same DataProvider class as order_approval_listing.xml (matching the
+                established convention in this module, e.g. GroupConfigDataProvider backing
+                both group_config_listing.xml and group_config_form.xml). This gets us
+                order_increment_id/customer_email/customer_group_label "for free" via
+                OrderApprovalDataProvider::addOrderDisplayFields(), on top of the raw
+                rgd_customercompliance_order_approval columns.
+            -->
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\OrderApprovalDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_order_approval_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">approval_id</argument>
+            <argument name="requestFieldName" xsi:type="string">approval_id</argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <!--
+            No <submitUrl> here: this form has no single generic "Save" action. Each decision
+            button supplies its own target via its "options.submit_url" (see
+            Block\Adminhtml\Approval\View\ApproveButton's PHPDoc for how that mechanism works).
+        -->
+    </dataSource>
+    <fieldset name="order_approval_fieldset">
+        <settings>
+            <label translate="true">Order Approval</label>
+        </settings>
+        <field name="approval_id" formElement="input" sortOrder="5">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="visible" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+        <field name="order_increment_id" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Order #</label>
+                <dataScope>order_increment_id</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="customer_email" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Email</label>
+                <dataScope>customer_email</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="customer_group_label" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Group</label>
+                <dataScope>customer_group_label</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="status" formElement="input" sortOrder="40">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Status</label>
+                <dataScope>status</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="created_at" formElement="input" sortOrder="50">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Submitted At</label>
+                <dataScope>created_at</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="reviewer_admin_id" formElement="input" sortOrder="60">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Reviewed By (Admin User ID)</label>
+                <dataScope>reviewer_admin_id</dataScope>
+                <disabled>true</disabled>
+                <!-- Approximation: shows the raw admin_user.user_id rather than a resolved
+                     admin username; resolving that would need a small options-source/renderer
+                     (Magento\User\Model\ResourceModel\User) not currently in this module. -->
+            </settings>
+        </field>
+        <field name="decision_at" formElement="input" sortOrder="70">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Decision At</label>
+                <dataScope>decision_at</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="refund_status" formElement="input" sortOrder="80">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Refund Status</label>
+                <dataScope>refund_status</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="refund_reference" formElement="input" sortOrder="90">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Refund Reference</label>
+                <dataScope>refund_reference</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <field name="resubmission_count" formElement="input" sortOrder="100">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Resubmission Count</label>
+                <dataScope>resubmission_count</dataScope>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+        <!--
+            Populated by Ui\DataProvider\OrderApprovalDataProvider::addComplianceDataFields(),
+            which joins rgd_customercompliance_field_value / rgd_customercompliance_document by
+            the approval's customer_id and resolves field labels via FieldRepositoryInterface.
+            Left as simple disabled textareas (one "Label: value" line per row) rather than a
+            nested grid/listing component, matching this form's overall "simple display fields"
+            style - see that data provider method's own PHPDoc for the bounded-N+1 performance
+            note (flagged for the Performance Testing stage, same as the grid's order/customer
+            display columns above it).
+        -->
+        <field name="submitted_field_values_display" formElement="textarea" sortOrder="110">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Submitted Field Values</label>
+                <dataScope>submitted_field_values_display</dataScope>
+                <disabled>true</disabled>
+            </settings>
+            <formElements>
+                <textarea>
+                    <settings>
+                        <rows>4</rows>
+                    </settings>
+                </textarea>
+            </formElements>
+        </field>
+        <field name="documents_display" formElement="textarea" sortOrder="120">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Documents</label>
+                <dataScope>documents_display</dataScope>
+                <disabled>true</disabled>
+                <notice translate="true">
+                    Each line shows "Label: fileName (download URL)". The download URL is
+                    ACL-guarded by Controller\Adminhtml\Document\Download.
+                </notice>
+            </settings>
+            <formElements>
+                <textarea>
+                    <settings>
+                        <rows>4</rows>
+                    </settings>
+                </textarea>
+            </formElements>
+        </field>
+        <field name="decision_notes" formElement="textarea" sortOrder="130">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Decision Notes</label>
+                <dataScope>decision_notes</dataScope>
+                <notice translate="true">
+                    Required when rejecting (Controller\Adminhtml\Approval\Reject rejects the
+                    request server-side if this is left blank); optional when approving.
+                </notice>
+            </settings>
+            <formElements>
+                <textarea>
+                    <settings>
+                        <rows>4</rows>
+                    </settings>
+                </textarea>
+            </formElements>
+        </field>
+    </fieldset>
+</form>

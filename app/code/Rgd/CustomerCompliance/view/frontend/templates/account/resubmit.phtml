@@ -1,0 +1,168 @@
+<?php
+/**
+ * @var \Rgd\CustomerCompliance\Block\Account\Resubmit $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \Rgd\CustomerCompliance\Api\Data\FieldInterface[] $fields */
+$fields = $block->getFields();
+$decisionNotes = $block->getDecisionNotes();
+?>
+<div class="block block-compliance-resubmit">
+    <?php if ($decisionNotes !== ''): ?>
+        <div class="message message-warning compliance-rejection-banner">
+            <span>
+                <strong><?= $escaper->escapeHtml(__('Your previous submission was rejected.')) ?></strong><br>
+                <?= $escaper->escapeHtml(__('Reason: %1', $decisionNotes)) ?>
+            </span>
+        </div>
+    <?php endif; ?>
+
+    <form class="form compliance-resubmit-form"
+          action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>"
+          method="post"
+          enctype="multipart/form-data"
+          id="compliance-resubmit-form">
+        <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+        <fieldset class="fieldset">
+            <legend class="legend"><span><?= $escaper->escapeHtml(__('Resubmit Compliance Documents')) ?></span></legend>
+            <br>
+            <?php foreach ($fields as $field): ?>
+                <?php
+                $fieldId = (int)$field->getFieldId();
+                $fieldCode = $field->getFieldCode();
+                $fieldType = $field->getFieldType();
+                $required = $field->isRequired();
+                $domId = 'compliance_resubmit_field_' . $fieldId;
+                ?>
+                <div class="field <?= $required ? 'required' : '' ?>">
+                    <label class="label" for="<?= $escaper->escapeHtmlAttr($domId) ?>">
+                        <span><?= $escaper->escapeHtml($field->getLabel()) ?></span>
+                    </label>
+                    <div class="control">
+                        <?php switch ($fieldType):
+                            case 'textarea': ?>
+                                <textarea name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                          id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                          class="textarea"
+                                          <?= $required ? 'required' : '' ?>></textarea>
+                            <?php break;
+
+                            case 'dropdown': ?>
+                                <select name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                        id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                        class="select"
+                                        <?= $required ? 'required' : '' ?>>
+                                    <option value=""><?= $escaper->escapeHtml(__('-- Please Select --')) ?></option>
+                                    <?php foreach ((array)$field->getOptions() as $optionValue => $optionLabel): ?>
+                                        <option value="<?= $escaper->escapeHtmlAttr((string)$optionValue) ?>">
+                                            <?= $escaper->escapeHtml((string)$optionLabel) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php break;
+
+                            case 'radio': ?>
+                                <?php foreach ((array)$field->getOptions() as $optionValue => $optionLabel): ?>
+                                    <div class="control-radio">
+                                        <input type="radio"
+                                               name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                               id="<?= $escaper->escapeHtmlAttr($domId . '_' . $optionValue) ?>"
+                                               value="<?= $escaper->escapeHtmlAttr((string)$optionValue) ?>"
+                                               <?= $required ? 'required' : '' ?>>
+                                        <label for="<?= $escaper->escapeHtmlAttr($domId . '_' . $optionValue) ?>">
+                                            <?= $escaper->escapeHtml((string)$optionLabel) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php break;
+
+                            case 'checkbox': ?>
+                                <input type="checkbox"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       value="1"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+
+                            case 'file':
+                            case 'image': ?>
+                                <input type="file"
+                                       name="customercompliance_files[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-file"
+                                       <?= $field->getAllowedExtensions()
+                                           ? 'accept=".' . $escaper->escapeHtmlAttr(
+                                               str_replace(',', ',.', (string)$field->getAllowedExtensions())
+                                           )
+                                           : '' ?>
+                                       <?= $required ? 'required' : '' ?>>
+                                <?php if ($field->getAllowedExtensions() || $field->getMaxFileSizeKb()): ?>
+                                    <div class="compliance-field-note note">
+                                        <?php if ($field->getAllowedExtensions()): ?>
+                                            <?= $escaper->escapeHtml(
+                                                __('Allowed file types: %1', $field->getAllowedExtensions())
+                                            ) ?>
+                                        <?php endif; ?>
+                                        <?php if ($field->getMaxFileSizeKb()): ?>
+                                            <?= $escaper->escapeHtml(
+                                                __('Max file size: %1 KB', $field->getMaxFileSizeKb())
+                                            ) ?>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php break;
+
+                            case 'date': ?>
+                                <input type="date"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-text"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+
+                            case 'number': ?>
+                                <input type="number"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-text"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+
+                            case 'email': ?>
+                                <input type="email"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-text"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+
+                            case 'phone': ?>
+                                <input type="tel"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-text"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+
+                            default: /* text */ ?>
+                                <input type="text"
+                                       name="customercompliance_fields[<?= $escaper->escapeHtmlAttr($fieldCode) ?>]"
+                                       id="<?= $escaper->escapeHtmlAttr($domId) ?>"
+                                       class="input-text"
+                                       <?= $required ? 'required' : '' ?>>
+                            <?php break;
+                        endswitch; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </fieldset>
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button type="submit" class="action submit primary">
+                    <span><?= $escaper->escapeHtml(__('Resubmit Documents')) ?></span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

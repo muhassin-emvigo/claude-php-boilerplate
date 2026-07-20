@@ -1,0 +1,23 @@
+<!--@subject {{trans "Action required: order #%order_id verification"}} @-->
+<!--@vars {
+"var customer.name":"Customer Name",
+"var order.increment_id":"Order Increment ID",
+"var decision.notes":"Reviewer Notes",
+"var store.name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table>
+    <tr class="email-intro">
+        <td>
+            <p>{{trans "Dear %name," name=$customer.name}}</p>
+            <p>{{trans "We were unable to verify the compliance documents submitted for order #%order_increment_id." order_increment_id=$order.increment_id}}</p>
+            <p>{{trans "Reviewer notes: %notes" notes=$decision.notes}}</p>
+            <p>{{trans "Please resubmit the required documents so we can continue processing your order. If a refund is applicable it will be processed automatically."}}</p>
+            <p>{{trans "Thank you for your understanding, %store_name." store_name=$store.name}}</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

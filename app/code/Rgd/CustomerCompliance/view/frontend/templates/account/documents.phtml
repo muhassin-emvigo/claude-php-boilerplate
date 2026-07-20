@@ -1,0 +1,57 @@
+<?php
+/**
+ * @var \Rgd\CustomerCompliance\Block\Account\Documents $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \Rgd\CustomerCompliance\Api\Data\DocumentInterface[] $documents */
+$documents = $block->getDocuments();
+?>
+<div class="block block-compliance-documents">
+    <div class="block-title">
+        <strong><?= $escaper->escapeHtml(__('My Compliance Documents')) ?></strong>
+    </div>
+    <div class="block-content">
+        <?php if (empty($documents)): ?>
+            <div class="message info empty">
+                <span><?= $escaper->escapeHtml(__('You have not uploaded any compliance documents yet.')) ?></span>
+            </div>
+        <?php else: ?>
+            <div class="table-wrapper compliance-documents">
+                <table class="data table table-order-items compliance-documents-table" id="compliance-documents-table">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('My Compliance Documents')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col file"><?= $escaper->escapeHtml(__('File Name')) ?></th>
+                            <th scope="col" class="col type"><?= $escaper->escapeHtml(__('Content Type')) ?></th>
+                            <th scope="col" class="col date"><?= $escaper->escapeHtml(__('Uploaded On')) ?></th>
+                            <th scope="col" class="col actions"><?= $escaper->escapeHtml(__('Actions')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($documents as $document): ?>
+                            <tr>
+                                <td data-th="<?= $escaper->escapeHtmlAttr(__('File Name')) ?>" class="col file">
+                                    <?= $escaper->escapeHtml($document->getFileName()) ?>
+                                </td>
+                                <td data-th="<?= $escaper->escapeHtmlAttr(__('Content Type')) ?>" class="col type">
+                                    <?= $escaper->escapeHtml($document->getContentType()) ?>
+                                </td>
+                                <td data-th="<?= $escaper->escapeHtmlAttr(__('Uploaded On')) ?>" class="col date">
+                                    <?= $document->getCreatedAt()
+                                        ? $escaper->escapeHtml($block->formatDate($document->getCreatedAt(), \IntlDateFormatter::MEDIUM))
+                                        : '' ?>
+                                </td>
+                                <td data-th="<?= $escaper->escapeHtmlAttr(__('Actions')) ?>" class="col actions">
+                                    <a href="<?= $escaper->escapeUrl($block->getDownloadUrl($document)) ?>" class="action download">
+                                        <span><?= $escaper->escapeHtml(__('Download')) ?></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>

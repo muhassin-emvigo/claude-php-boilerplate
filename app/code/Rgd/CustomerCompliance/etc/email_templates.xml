@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="customercompliance_registration_success" label="Compliance: Registration Successful" file="registration_success.html" type="html" module="Rgd_CustomerCompliance" area="frontend"/>
+    <template id="customercompliance_order_approved" label="Compliance: Order Approved" file="order_approved.html" type="html" module="Rgd_CustomerCompliance" area="frontend"/>
+    <template id="customercompliance_order_rejected" label="Compliance: Order Rejected" file="order_rejected.html" type="html" module="Rgd_CustomerCompliance" area="frontend"/>
+</config>

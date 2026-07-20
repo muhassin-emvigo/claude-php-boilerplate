@@ -1,0 +1,31 @@
+<?php
+/**
+ * @var \Rgd\CustomerCompliance\Block\Order\ApprovalStatus $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+use Rgd\CustomerCompliance\Api\Data\OrderApprovalInterface;
+
+$orderId = $block->getCurrentOrderId();
+$approval = $block->getApproval($orderId);
+
+// No approval record means this order never needed compliance review; render nothing.
+if ($approval === null) {
+    return;
+}
+?>
+<?php if ($approval->getStatus() === OrderApprovalInterface::STATUS_PENDING_VERIFICATION): ?>
+    <div class="message message-notice compliance-approval-status compliance-approval-pending">
+        <span><?= $escaper->escapeHtml(__('Your order is pending verification.')) ?></span>
+    </div>
+<?php elseif ($approval->getStatus() === OrderApprovalInterface::STATUS_REJECTED): ?>
+    <div class="message message-error compliance-approval-status compliance-approval-rejected">
+        <span>
+            <strong><?= $escaper->escapeHtml(__('Your order documents were rejected.')) ?></strong><br>
+            <?= $escaper->escapeHtml(__('Reason: %1', (string)$approval->getDecisionNotes())) ?><br>
+            <a href="<?= $escaper->escapeUrl($block->getResubmitUrl((int)$orderId)) ?>" class="action resubmit">
+                <span><?= $escaper->escapeHtml(__('Resubmit documents')) ?></span>
+            </a>
+        </span>
+    </div>
+<?php endif; ?>

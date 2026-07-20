@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Group Config edit/new page. Save/Back buttons are wired inside group_config_form.xml itself
+    (its <settings><buttons> block references
+    Block\Adminhtml\GroupConfig\Edit\{BackButton,SaveButton}), per standard Ui/Component form
+    convention - no additional block declarations are needed here.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" layout="admin-1column">
+    <head>
+        <title>Group Configuration</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <uiComponent name="group_config_form"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Repository preferences -->
+    <preference for="Rgd\CustomerCompliance\Api\GroupConfigRepositoryInterface" type="Rgd\CustomerCompliance\Model\GroupConfigRepository"/>
+    <preference for="Rgd\CustomerCompliance\Api\FieldRepositoryInterface" type="Rgd\CustomerCompliance\Model\FieldRepository"/>
+    <preference for="Rgd\CustomerCompliance\Api\DocumentRepositoryInterface" type="Rgd\CustomerCompliance\Model\DocumentRepository"/>
+    <preference for="Rgd\CustomerCompliance\Api\OrderApprovalRepositoryInterface" type="Rgd\CustomerCompliance\Model\OrderApprovalRepository"/>
+    <preference for="Rgd\CustomerCompliance\Api\AuditLogRepositoryInterface" type="Rgd\CustomerCompliance\Model\AuditLogRepository"/>
+
+    <!-- Service preferences -->
+    <preference for="Rgd\CustomerCompliance\Api\FieldConfigProviderInterface" type="Rgd\CustomerCompliance\Model\FieldConfigProvider"/>
+    <preference for="Rgd\CustomerCompliance\Api\RegistrationComplianceServiceInterface" type="Rgd\CustomerCompliance\Model\Service\RegistrationComplianceService"/>
+    <preference for="Rgd\CustomerCompliance\Api\OrderApprovalServiceInterface" type="Rgd\CustomerCompliance\Model\Service\OrderApprovalService"/>
+    <preference for="Rgd\CustomerCompliance\Api\DocumentStorageServiceInterface" type="Rgd\CustomerCompliance\Model\Service\DocumentStorageService"/>
+    <preference for="Rgd\CustomerCompliance\Api\DocumentResubmissionServiceInterface" type="Rgd\CustomerCompliance\Model\Service\DocumentResubmissionService"/>
+    <preference for="Rgd\CustomerCompliance\Api\OrderRefundServiceInterface" type="Rgd\CustomerCompliance\Model\Service\OrderRefundService"/>
+    <preference for="Rgd\CustomerCompliance\Api\AuditLoggerInterface" type="Rgd\CustomerCompliance\Model\Service\AuditLogger"/>
+
+    <!-- Data interface preferences -->
+    <preference for="Rgd\CustomerCompliance\Api\Data\GroupConfigInterface" type="Rgd\CustomerCompliance\Model\GroupConfig"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\FieldInterface" type="Rgd\CustomerCompliance\Model\Field"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\FieldValueInterface" type="Rgd\CustomerCompliance\Model\FieldValue"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\DocumentInterface" type="Rgd\CustomerCompliance\Model\Document"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\OrderApprovalInterface" type="Rgd\CustomerCompliance\Model\OrderApproval"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\AuditLogEntryInterface" type="Rgd\CustomerCompliance\Model\AuditLogEntry"/>
+    <preference for="Rgd\CustomerCompliance\Api\Data\RefundResultInterface" type="Rgd\CustomerCompliance\Model\Data\RefundResult"/>
+
+    <!-- Plugins -->
+    <type name="Magento\Sales\Api\OrderManagementInterface">
+        <plugin name="rgd_customercompliance_hold_order_for_verification" type="Rgd\CustomerCompliance\Plugin\Sales\HoldOrderForVerificationPlugin"/>
+    </type>
+    <type name="Magento\Sales\Api\ShipOrderInterface">
+        <plugin name="rgd_customercompliance_block_shipment" type="Rgd\CustomerCompliance\Plugin\Sales\BlockShipmentPlugin"/>
+    </type>
+    <type name="Magento\Sales\Api\InvoiceOrderInterface">
+        <plugin name="rgd_customercompliance_block_invoice" type="Rgd\CustomerCompliance\Plugin\Sales\BlockInvoicePlugin"/>
+    </type>
+    <type name="Magento\Customer\Api\AccountManagementInterface">
+        <plugin name="rgd_customercompliance_registration_validation" type="Rgd\CustomerCompliance\Plugin\Customer\RegistrationValidationPlugin"/>
+    </type>
+
+    <!-- Refund strategy pool -->
+    <virtualType name="Rgd\CustomerCompliance\Model\Refund\RefundStrategyPool" type="Magento\Framework\ObjectManager\TMap">
+        <arguments>
+            <argument name="array" xsi:type="array">
+                <item name="razorpay" xsi:type="string">Rgd\CustomerCompliance\Model\Refund\RazorpayOnlineRefundStrategy</item>
+                <item name="offline" xsi:type="string">Rgd\CustomerCompliance\Model\Refund\OfflineFallbackRefundStrategy</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Rgd\CustomerCompliance\Model\Service\OrderRefundService">
+        <arguments>
+            <argument name="strategies" xsi:type="object">Rgd\CustomerCompliance\Model\Refund\RefundStrategyPool</argument>
+        </arguments>
+    </type>
+</config>

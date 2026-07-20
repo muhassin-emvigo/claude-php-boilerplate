@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Compliance Fields grid. Per the Design doc this grid is normally viewed scoped to a single
+    Group Configuration (surfaced as a tab on the Group Config edit page, passing "config_id" as
+    a request/query param that Ui\DataProvider\FieldDataProvider filters on), but it is also
+    registered as a standalone admin page.
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_field_listing.rgd_customercompliance_field_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>rgd_customercompliance_field_columns</spinner>
+        <deps>
+            <dep>rgd_customercompliance_field_listing.rgd_customercompliance_field_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_field_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\FieldDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_field_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">field_id</argument>
+            <argument name="requestFieldName" xsi:type="string">field_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">field_id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="rgd_customercompliance_field_columns">
+        <column name="label">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Label</label>
+            </settings>
+        </column>
+        <column name="field_type">
+            <settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <options class="Rgd\CustomerCompliance\Model\Config\Source\FieldType"/>
+                <label translate="true">Field Type</label>
+            </settings>
+        </column>
+        <column name="is_required">
+            <settings>
+                <filter>select</filter>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <dataType>select</dataType>
+                <label translate="true">Required</label>
+            </settings>
+        </column>
+        <column name="sort_order">
+            <settings>
+                <filter>textRange</filter>
+                <dataType>text</dataType>
+                <sorting>asc</sorting>
+                <label translate="true">Sort Order</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Rgd\CustomerCompliance\Ui\Component\Listing\Column\FieldActions">
+            <settings>
+                <indexField>field_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>100</resizeDefaultWidth>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

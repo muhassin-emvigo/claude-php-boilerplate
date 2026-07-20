@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Field edit/new page. Save/Back buttons are wired inside field_form.xml itself (its
+    <settings><buttons> block references
+    Block\Adminhtml\Field\Edit\{BackButton,SaveButton}) - no additional block declarations
+    needed here.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" layout="admin-1column">
+    <head>
+        <title>Compliance Field</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <uiComponent name="field_form"/>
+        </referenceContainer>
+    </body>
+</page>

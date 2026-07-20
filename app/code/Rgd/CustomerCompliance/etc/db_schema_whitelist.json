@@ -1,0 +1,137 @@
+{
+    "rgd_customercompliance_group_config": {
+        "column": {
+            "config_id": true,
+            "customer_group_id": true,
+            "is_approval_required": true,
+            "is_registration_fields_enabled": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {},
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CUSTOMER_GROUP_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CUSTOMER_GROUP_ID_CUSTOMER_GROUP_CUSTOMER_GROUP_ID": true
+        }
+    },
+    "rgd_customercompliance_field": {
+        "column": {
+            "field_id": true,
+            "config_id": true,
+            "field_code": true,
+            "field_type": true,
+            "label": true,
+            "is_required": true,
+            "sort_order": true,
+            "options_json": true,
+            "allowed_extensions": true,
+            "max_file_size_kb": true,
+            "version": true,
+            "is_active": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_IS_ACTIVE_SORT_ORDER": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_FIELD_CODE_VERSION": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_CONFIG_ID_RGD_CUSTOMERCOMPLIANCE_GROUP_CONFIG_CONFIG_ID": true
+        }
+    },
+    "rgd_customercompliance_document": {
+        "column": {
+            "document_id": true,
+            "customer_id": true,
+            "field_id": true,
+            "order_id": true,
+            "file_name": true,
+            "file_path": true,
+            "content_type": true,
+            "file_size": true,
+            "version": true,
+            "is_current": true,
+            "checksum": true,
+            "created_at": true
+        },
+        "index": {
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CUSTOMER_ID_FIELD_ID_IS_CURRENT": true,
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_ORDER_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CHECKSUM": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_FIELD_ID_RGD_CUSTOMERCOMPLIANCE_FIELD_FIELD_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_DOCUMENT_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "rgd_customercompliance_field_value": {
+        "column": {
+            "value_id": true,
+            "customer_id": true,
+            "field_id": true,
+            "value": true,
+            "document_id": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {},
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_CUSTOMER_ID_FIELD_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_FIELD_ID_RGD_CUSTOMERCOMPLIANCE_FIELD_FIELD_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_FIELD_VALUE_DOCUMENT_ID_RGD_CUSTOMERCOMPLIANCE_DOCUMENT_DOCUMENT_ID": true
+        }
+    },
+    "rgd_customercompliance_order_approval": {
+        "column": {
+            "approval_id": true,
+            "order_id": true,
+            "customer_id": true,
+            "status": true,
+            "reviewer_admin_id": true,
+            "decision_notes": true,
+            "decision_at": true,
+            "refund_status": true,
+            "refund_reference": true,
+            "resubmission_count": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_STATUS": true,
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_CUSTOMER_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_ORDER_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_ORDER_ID_SALES_ORDER_ENTITY_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_ORDER_APPROVAL_REVIEWER_ADMIN_ID_ADMIN_USER_USER_ID": true
+        }
+    },
+    "rgd_customercompliance_audit_log": {
+        "column": {
+            "log_id": true,
+            "actor_type": true,
+            "actor_id": true,
+            "action": true,
+            "entity_type": true,
+            "entity_id": true,
+            "notes": true,
+            "created_at": true
+        },
+        "index": {
+            "RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_ENTITY_TYPE_ENTITY_ID": true,
+            "RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_ACTION": true,
+            "RGD_CUSTOMERCOMPLIANCE_AUDIT_LOG_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

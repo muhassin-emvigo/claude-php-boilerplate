@@ -1,0 +1,20 @@
+<!--@subject {{trans "Your order #%order_id has been approved"}} @-->
+<!--@vars {
+"var customer.name":"Customer Name",
+"var order.increment_id":"Order Increment ID",
+"var store.name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table>
+    <tr class="email-intro">
+        <td>
+            <p>{{trans "Dear %name," name=$customer.name}}</p>
+            <p>{{trans "Your compliance documents for order #%order_increment_id have been reviewed and approved. Your order is now being processed." order_increment_id=$order.increment_id}}</p>
+            <p>{{trans "Thank you for shopping with %store_name." store_name=$store.name}}</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

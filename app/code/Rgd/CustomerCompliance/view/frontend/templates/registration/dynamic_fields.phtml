@@ -1,0 +1,71 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \Rgd\CustomerCompliance\ViewModel\Registration\RegistrationFields $viewModel */
+$viewModel = $block->getViewModel();
+
+// Empty-state rule (Design doc): zero eligible groups => omit the whole compliance section
+// from the DOM entirely, do not render an empty state.
+if (!$viewModel->hasEligibleGroups()) {
+    return;
+}
+?>
+<fieldset class="fieldset compliance-group-select" id="customercompliance-group-fieldset">
+    <legend class="legend"><span><?= $escaper->escapeHtml(__('Compliance Information')) ?></span></legend>
+    <br>
+    <div class="field choice required" id="customercompliance-group-field">
+        <label class="label" for="compliance_group_selector">
+            <span><?= $escaper->escapeHtml(__('Please select the category that applies to you')) ?></span>
+        </label>
+        <div class="control">
+            <select name="compliance_group_selector"
+                    id="compliance_group_selector"
+                    class="select"
+                    data-bind="options: groupOptions,
+                               optionsText: 'groupLabel',
+                               optionsValue: 'groupId',
+                               optionsCaption: '<?= $escaper->escapeHtmlAttr(__('-- Please Select --')) ?>',
+                               value: selectedGroupId">
+            </select>
+        </div>
+    </div>
+</fieldset>
+
+<div id="customercompliance-validation-summary"
+     class="message message-error compliance-validation-summary"
+     role="alert"
+     aria-live="assertive"
+     tabindex="-1"
+     style="display:none">
+</div>
+
+<div id="customercompliance-fields-container"
+     class="fieldset compliance-fields"
+     data-bind="visible: hasSelectedGroup, template: { name: 'customercompliance-field-template', foreach: currentGroupFields, afterRender: renderFieldControl }"
+     style="display:none">
+</div>
+
+<script type="text/html" id="customercompliance-field-template">
+    <div class="field" data-bind="css: { required: isRequired, choice: fieldType === 'checkbox' }, attr: { 'data-field-code': fieldCode, 'data-field-type': fieldType }">
+        <label class="label" data-bind="attr: { for: 'compliance_field_' + fieldId }">
+            <span data-bind="text: label"></span>
+        </label>
+        <div class="control compliance-field-control" data-bind="attr: { id: 'compliance_field_control_' + fieldId }"></div>
+        <div class="compliance-field-error" data-bind="attr: { id: 'compliance_field_error_' + fieldId }" role="alert"></div>
+    </div>
+</script>
+
+<script type="text/x-magento-init">
+{
+    "#customercompliance-fields-container": {
+        "Rgd_CustomerCompliance/js/registration-dynamic-fields": {
+            "groupsData": <?= /* @noEscape */ $viewModel->getEligibleGroupsJson() ?>,
+            "groupSelectorSelector": "#compliance_group_selector",
+            "validationSummarySelector": "#customercompliance-validation-summary"
+        }
+    }
+}
+</script>

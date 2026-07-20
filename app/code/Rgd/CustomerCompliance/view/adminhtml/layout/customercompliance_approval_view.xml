@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Order Approval detail/decision page. Back/Retry-Refund/Reject/Approve buttons are wired
+    inside order_approval_form.xml itself (its <settings><buttons> block references
+    Block\Adminhtml\Approval\View\{BackButton,RetryRefundButton,RejectButton,ApproveButton}) -
+    no additional block declarations needed here.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" layout="admin-1column">
+    <head>
+        <title>Order Approval</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <uiComponent name="order_approval_form"/>
+        </referenceContainer>
+    </body>
+</page>

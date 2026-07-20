@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Group Configuration edit/new form.
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_group_config_form.rgd_customercompliance_group_config_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Group Configuration</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Rgd\CustomerCompliance\Block\Adminhtml\GroupConfig\Edit\BackButton"/>
+            <button name="save" class="Rgd\CustomerCompliance\Block\Adminhtml\GroupConfig\Edit\SaveButton"/>
+        </buttons>
+        <namespace>rgd_customercompliance_group_config_form</namespace>
+        <!--
+            Empty dataScope: fields post as flat top-level request params (customer_group_id,
+            is_approval_required, is_registration_fields_enabled, ...), matching what
+            Controller\Adminhtml\GroupConfig\Save reads via $this->getRequest()->getParams().
+        -->
+        <dataScope></dataScope>
+        <deps>
+            <dep>rgd_customercompliance_group_config_form.rgd_customercompliance_group_config_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_group_config_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\GroupConfigDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_group_config_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">config_id</argument>
+            <argument name="requestFieldName" xsi:type="string">config_id</argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="customercompliance/groupconfig/save"/>
+        </settings>
+    </dataSource>
+    <fieldset name="group_config_fieldset">
+        <settings>
+            <label translate="true">Group Configuration</label>
+        </settings>
+        <field name="config_id" formElement="input" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="visible" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+        <field name="customer_group_id" formElement="select" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Group</label>
+                <dataScope>customer_group_id</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Customer\Model\Config\Source\Group"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="is_approval_required" formElement="checkbox" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--
+                        Broadcasts this field's checked state so the dependent
+                        is_registration_fields_enabled toggle below can react to it client-side.
+                        This is the standard Ui/Component "${ $.provider }:data.<scope>" export
+                        path used for cross-field data links; "data" is the form's own
+                        <dataScope> (see <settings><dataScope>data</dataScope></settings> above)
+                        and "is_approval_required" is this field's own <dataScope>.
+                    -->
+                    <item name="exports" xsi:type="array">
+                        <item name="checked" xsi:type="string">${ $.provider }:data.is_approval_required</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Order Approval Required</label>
+                <dataScope>is_approval_required</dataScope>
+                <valueMap>
+                    <map name="false" xsi:type="string">0</map>
+                    <map name="true" xsi:type="string">1</map>
+                </valueMap>
+                <default>0</default>
+            </settings>
+        </field>
+        <field name="is_registration_fields_enabled" formElement="checkbox" sortOrder="40">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--
+                        Best-effort client-side wiring of the confirmed business rule: this
+                        toggle auto-disables (and is force-unchecked) whenever
+                        is_approval_required is unchecked. "imports" here reads the value
+                        exported above by is_approval_required's "exports" config.
+                        NOTE: this is a UX nicety only. The authoritative enforcement of "cannot
+                        enable registration fields without approval required" lives server-side
+                        in Controller\Adminhtml\GroupConfig\Save (and/or the GroupConfig model /
+                        repository save path) — that check runs regardless of what this
+                        client-side wiring does or whether JS is disabled, so a mismatch here is
+                        a cosmetic bug, not a data-integrity risk.
+                    -->
+                    <item name="imports" xsi:type="array">
+                        <item name="disabled" xsi:type="string">${ $.provider }:data.is_approval_required</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Registration Compliance Fields Enabled</label>
+                <dataScope>is_registration_fields_enabled</dataScope>
+                <valueMap>
+                    <map name="false" xsi:type="string">0</map>
+                    <map name="true" xsi:type="string">1</map>
+                </valueMap>
+                <default>0</default>
+                <notice translate="true">
+                    Automatically disabled when Order Approval Required is off. Enforced
+                    server-side regardless of this checkbox's client-side state.
+                </notice>
+            </settings>
+        </field>
+    </fieldset>
+</form>

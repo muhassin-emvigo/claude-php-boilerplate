@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Group Configuration grid.
+    Modeled on core listing.xml shape (e.g. Magento_Cms cms_block_listing.xml /
+    Magento_Customer customer_group_listing.xml).
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">rgd_customercompliance_group_config_listing.rgd_customercompliance_group_config_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>rgd_customercompliance_group_config_columns</spinner>
+        <deps>
+            <dep>rgd_customercompliance_group_config_listing.rgd_customercompliance_group_config_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="rgd_customercompliance_group_config_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Rgd\CustomerCompliance\Ui\DataProvider\GroupConfigDataProvider</argument>
+            <argument name="name" xsi:type="string">rgd_customercompliance_group_config_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">config_id</argument>
+            <argument name="requestFieldName" xsi:type="string">config_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">config_id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="rgd_customercompliance_group_config_columns">
+        <column name="config_id">
+            <settings>
+                <filter>textRange</filter>
+                <sorting>desc</sorting>
+                <label translate="true">ID</label>
+            </settings>
+        </column>
+        <!--
+            Shows the raw customer_group_id. A nicer grid would resolve this to the group's
+            display name (e.g. via a joined column or a small options-source column renderer
+            resolving Magento\Customer\Api\GroupRepositoryInterface), but that requires either a
+            collection JOIN against customer_group or a per-row lookup similar to the
+            OrderApprovalDataProvider's N+1 approach. Left as a plain id column for MVP and
+            flagged here as a nice-to-have UX improvement.
+        -->
+        <column name="customer_group_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer Group ID</label>
+            </settings>
+        </column>
+        <column name="is_approval_required">
+            <settings>
+                <filter>select</filter>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <dataType>select</dataType>
+                <label translate="true">Approval Required</label>
+            </settings>
+        </column>
+        <column name="is_registration_fields_enabled">
+            <settings>
+                <filter>select</filter>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <dataType>select</dataType>
+                <label translate="true">Registration Fields Enabled</label>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Rgd\CustomerCompliance\Ui\Component\Listing\Column\GroupConfigActions">
+            <settings>
+                <indexField>config_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>80</resizeDefaultWidth>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>
