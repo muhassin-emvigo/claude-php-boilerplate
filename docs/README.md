@@ -9,6 +9,7 @@ Start here. Read these in order:
 4. **[04-making-business-logic-changes.md](04-making-business-logic-changes.md)** — For developers: where to make code changes, and how to reuse this setup for other projects.
 5. **[05-requesting-a-change.md](05-requesting-a-change.md)** — Anyone (technical or not): want something new or different? Start here.
 6. **[06-ai-tooling-status.md](06-ai-tooling-status.md)** — Developers using the `.claude/agents/` pipeline: what's actually installed (gstack/claude-mem status) and how to check local token usage.
+7. **[07-installing-magento-from-scratch.md](07-installing-magento-from-scratch.md)** — OS-agnostic reference for installing Magento (PHP, Composer, MySQL/MariaDB, web server, search engine) on Windows, macOS, or Linux — not tied to XAMPP. Use this if you're not on Windows/XAMPP, or want to understand what `00-first-time-setup.md`'s scripts automate.
 
 ## Architecture Decision Records
 

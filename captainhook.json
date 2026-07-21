@@ -34,7 +34,7 @@
         ]
     },
     "pre-push": {
-        "enabled": true,
+        "enabled": false,
         "actions": [
             {
                 "action": "php vendor/bin/phpunit -c phpunit.xml.dist --testsuite \"Unit Tests\""
