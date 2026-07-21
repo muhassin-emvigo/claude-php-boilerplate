@@ -37,28 +37,66 @@ what those scripts are doing under the hood.
 
 ## 3. Prerequisites
 
-| Component | Minimum Version | Notes |
-|---|---|---|
-| PHP | 8.2+ (check your target Magento version's support matrix) | See required extensions below |
-| Composer | 2.x | Used to resolve and download Magento and its dependencies |
-| MySQL or MariaDB | MySQL 8.0+ / MariaDB 10.6+ | One database instance, one schema |
-| Web server | Apache 2.4+ or Nginx 1.18+ | Either works; Nginx needs an explicit rewrite config |
-| Search engine | OpenSearch 2.x or Elasticsearch 7.x/8.x | Required by Magento 2.4+; must be reachable before installing |
-| Node.js (optional) | 18.x+ | Only needed if you'll customize frontend build tooling (Grunt/Webpack) |
-| Magento Marketplace keys | — | Free account at the Adobe/Magento Marketplace; needed as Composer credentials |
+**Current version matrix (verified against Adobe's official system
+requirements docs — check
+[experienceleague.adobe.com/.../system-requirements](https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements)
+yourself before installing, since Adobe ships new minor versions and
+patches regularly):**
+
+| Magento Version | Status (as of mid-2026) | PHP | Composer | Database | Search Engine | Cache/Session | Message Queue |
+|---|---|---|---|---|---|---|---|
+| **2.4.9** | Latest stable (GA May 12, 2026; supported through May 12, 2029) | 8.5 | 2.9.3+ | MySQL 8.4, MariaDB 11.8/12.3 | OpenSearch 3 | Valkey 9, Varnish 8 | RabbitMQ 4.2 |
+| **2.4.8-p5** | Previous stable line, still supported, broader ecosystem/extension compatibility | 8.3, 8.4 | 2.9.3+ | MySQL 8.4, MariaDB 11.4/11.8 | OpenSearch 3 (Elasticsearch dropped) | Valkey 8.1 (Redis unsupported) | RabbitMQ 4.2 |
+
+If you're setting up a brand-new project with no third-party extension
+constraints, install **2.4.9** with **PHP 8.5**. If any extension, payment
+module, or hosting provider you depend on hasn't caught up to PHP 8.5 yet
+(common in the months right after a major PHP bump), use **2.4.8-p5** with
+**PHP 8.3 or 8.4** instead — it's still an actively supported release, just
+one line behind latest. Either way, keep the PHP, database, search engine,
+and cache versions matched to whichever Magento line you pick — mixing
+versions across lines (e.g. Magento 2.4.8 with PHP 8.5, or Magento 2.4.9
+with Elasticsearch) is unsupported and a common source of hard-to-diagnose
+failures.
+
+**Note on Redis:** Recent Magento versions have moved from Redis to
+**Valkey** (a Redis-compatible open-source fork) for cache and session
+storage. If you're following an older guide that says "install Redis,"
+substitute Valkey — the config keys and CLI are drop-in compatible.
+
+| Component | Notes |
+|---|---|
+| PHP | See version matrix above; extensions listed below |
+| Composer | 2.9.3+ |
+| MySQL or MariaDB | See version matrix above; one database instance, one schema |
+| Web server | Apache 2.4+ or Nginx 1.18+ — either works; Nginx needs an explicit rewrite config |
+| Search engine | OpenSearch 3 (required — Elasticsearch is no longer supported on 2.4.8+) |
+| Cache/session store | Valkey (Redis-compatible) — optional for local dev, recommended for anything production-like |
+| Node.js (optional) | 18.x+ — only needed if you'll customize frontend build tooling (Grunt/Webpack) |
+| Magento Marketplace keys | Free account at the Adobe/Magento Marketplace; needed as Composer credentials |
 
 Required PHP extensions: `bcmath`, `curl`, `gd` (or `imagick`), `intl`,
 `mbstring`, `openssl`, `pdo_mysql`, `soap`, `sockets`, `sodium`, `xsl`, `zip`.
+This list has stayed stable across recent Magento versions, but always cross-check
+the extension list for your exact target version on Adobe's system
+requirements page — new versions occasionally add one (e.g. `openssl` and
+`sodium` were both later additions to the historical list).
 
 ## 4. Installing PHP
 
+Pick the PHP version matching the Magento line you chose in section 3 —
+**8.5** for Magento 2.4.9, or **8.3/8.4** for Magento 2.4.8-p5. XAMPP in
+particular tends to lag a release or two behind the newest PHP, so check
+what version your XAMPP bundle ships before assuming it has 8.5 — you may
+need a standalone PHP install instead if it doesn't.
+
 | OS | Commands |
 |---|---|
-| Windows (no XAMPP) | Download PHP 8.2+ from windows.php.net, extract, add to `PATH`. Enable extensions by uncommenting the matching `extension=` lines in `php.ini`. |
-| Windows (XAMPP) | Included with XAMPP; edit `php.ini` inside the XAMPP `php` folder to enable extensions, then restart Apache. |
-| macOS (Homebrew) | `brew install php@8.2` then `brew link php@8.2 --force` |
-| Linux (Debian/Ubuntu) | `sudo apt update && sudo apt install php8.2 php8.2-{bcmath,curl,gd,intl,mbstring,soap,xsl,zip,mysql,sodium}` |
-| Linux (RHEL/Alma/Rocky) | `sudo dnf install php php-{bcmath,gd,intl,mbstring,soap,xml,mysqlnd}` |
+| Windows (no XAMPP) | Download the matching PHP build from windows.php.net, extract, add to `PATH`. Enable extensions by uncommenting the matching `extension=` lines in `php.ini`. |
+| Windows (XAMPP) | Check the bundled PHP version first (`php -v`); if it's older than your target, install a standalone PHP build instead of relying on XAMPP's. Edit `php.ini` inside the PHP folder to enable extensions, then restart Apache. |
+| macOS (Homebrew) | `brew install php@8.4` (swap `8.4` for `8.5`/`8.3` to match your target) then `brew link php@8.4 --force` |
+| Linux (Debian/Ubuntu) | `sudo apt update && sudo apt install php8.4 php8.4-{bcmath,curl,gd,intl,mbstring,soap,xsl,zip,mysql,sodium}` (swap `8.4` for your target version; you may need the `ondrej/php` PPA for the newest releases) |
+| Linux (RHEL/Alma/Rocky) | `sudo dnf install php php-{bcmath,gd,intl,mbstring,soap,xml,mysqlnd}` (enable the Remi repo for newer PHP versions than the default OS repo ships) |
 
 Verify with:
 
@@ -122,17 +160,23 @@ into admin" errors later, so it's worth testing directly:
 mysql -u magento -p -h 127.0.0.1 magento -e "SELECT 1;"
 ```
 
-## 7. Installing a search engine (OpenSearch or Elasticsearch)
+## 7. Installing a search engine (OpenSearch)
 
 Magento 2.4+ requires a search engine reachable on port 9200 *before* the
-installer runs.
+installer runs. As of Magento 2.4.8, **Elasticsearch is no longer
+supported** — use **OpenSearch 3** for any current install.
 
 | OS | Commands |
 |---|---|
-| Windows | Download OpenSearch 2.11 (zip) for Windows, unzip, run `opensearch.bat` from the `bin` folder |
+| Windows | Download OpenSearch 3.x (zip) for Windows, unzip, run `opensearch.bat` from the `bin` folder |
 | macOS (Homebrew) | `brew install opensearch && brew services start opensearch` |
 | Linux (Debian/Ubuntu) | Download the `.deb` from opensearch.org, `sudo dpkg -i opensearch-*.deb`, `sudo systemctl enable --now opensearch` |
-| Docker (any OS) | `docker run -p 9200:9200 -e "discovery.type=single-node" -e "plugins.security.disabled=true" opensearchproject/opensearch:2.11.0` |
+| Docker (any OS) | `docker run -p 9200:9200 -e "discovery.type=single-node" -e "plugins.security.disabled=true" opensearchproject/opensearch:3` |
+
+Always pull the exact current 3.x patch tag from
+[opensearch.org's download page](https://opensearch.org/downloads.html)
+rather than hardcoding a version here — OpenSearch ships its own frequent
+patch releases independent of Magento's.
 
 Verify with:
 
@@ -144,6 +188,20 @@ You should get back a JSON response with a `"cluster_name"` field. If this
 step is skipped, the Magento installer fails partway through with a
 connection-refused error referencing Elasticsearch/OpenSearch — always
 confirm this first, since it's cheaper to fix here than to debug later.
+
+## 7a. Installing Valkey (cache/session store, optional for local dev)
+
+Skip this for a minimal local dev setup — Magento falls back to filesystem
+cache and database sessions without it. Install it if you want your local
+environment to match a production-like setup, or if you're testing
+cache/session behavior specifically.
+
+| OS | Commands |
+|---|---|
+| Windows | Valkey doesn't ship official Windows binaries; use WSL2 or Docker instead |
+| macOS (Homebrew) | `brew install valkey && brew services start valkey` |
+| Linux (Debian/Ubuntu) | `sudo apt install valkey-server && sudo systemctl enable --now valkey-server` |
+| Docker (any OS) | `docker run -p 6379:6379 valkey/valkey:8.1` |
 
 ## 8. Installing a web server
 
