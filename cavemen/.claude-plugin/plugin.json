@@ -1,9 +1,0 @@
-{
-  "name": "cavemen",
-  "description": "Automatically applies a lean 'cavemen procedure' to every markdown file that gets read, written, or edited: minimize token usage, avoid unnecessary explanation, and reuse stored context instead of repeating it.",
-  "version": "0.1.0",
-  "author": {
-    "name": "Suraj"
-  },
-  "hooks": "./hooks/hooks.json"
-}
