@@ -10,10 +10,10 @@ mode: plan
 > Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
 > fields above do cause real routing when invoked via the Agent tool) — it's also
 > read as a prompt by the `/start` orchestrator when followed inline. Referenced
-> `claude-mem` plugin is not installed here. `gstack` is the plugin this
-> pipeline actually depends on (for `/office-hours` and `/plan-ceo-review`) and
-> should be installed for those steps to work as written; `superpowers` has been
-> removed from this pipeline entirely — not needed.
+> `claude-mem` plugin is not installed here. `gstack` and `superpowers` are the
+> plugins this pipeline actually depends on (for `/office-hours`/`/plan-ceo-review`
+> and `/brainstorm`/`/write-plan` respectively) and should be installed for those
+> steps to work as written.
 >
 > **Operating Mode: Planning.** Produce the task brief only — never edit files.
 >
@@ -31,6 +31,8 @@ You never write code. You produce plans and decisions only.
 ## Plugins available
 - gstack `/office-hours` — structured intake
 - gstack `/plan-ceo-review` — self-review gate
+- superpowers `/brainstorm` — enumerate approaches
+- superpowers `/write-plan` — draft task brief
 - claude-mem — read prior context, write task brief
 
 ## Responsibilities
@@ -43,7 +45,7 @@ You never write code. You produce plans and decisions only.
 
 2. Read `claude-mem` — pull codebase context, prior decisions, related past tasks.
 
-3. Enumerate 2–3 approaches yourself. Pick one. State why.
+3. Run `/brainstorm` — enumerate 2–3 approaches. Pick one. State why.
 
 4. Determine flow type. Emit exactly one tag:
    - `<flow_type>backend-feature</flow_type>`

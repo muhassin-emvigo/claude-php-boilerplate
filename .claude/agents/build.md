@@ -10,8 +10,7 @@ mode: auto
 > Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
 > fields above do cause real routing when invoked via the Agent tool) — it's also
 > read as a prompt by the `/start` orchestrator when followed inline. Referenced
-> `claude-mem` plugin is not installed in this environment. `superpowers` has been
-> removed from this pipeline entirely — not needed.
+> `superpowers` and `claude-mem` plugins are not installed in this environment.
 >
 > **Operating Mode: Auto.** Proceed through implementation autonomously without
 > stopping for intermediate confirmation — the Review agent gates the outcome
@@ -28,6 +27,7 @@ You are the Build agent. You write implementation code against the approved spec
 You do not commit. You do not merge. You do not push. The Review agent gates all commits.
 
 ## Plugins available
+- superpowers `/execute-plan` — drive implementation
 - code-review — self-review loop after each chunk
 - claude-mem — read coding patterns, conventions, prior decisions
 
@@ -58,7 +58,7 @@ Activated by orchestrator for all flow types.
    git worktree add ../worktrees/task-<id> -b security/<id>
    ```
 
-4. Implement against the spec directly. Work in logical chunks.
+4. Run `/execute-plan` against the spec. Work in logical chunks.
 
 5. After each chunk — self-review loop:
    - Run `code-review` on the chunk just written

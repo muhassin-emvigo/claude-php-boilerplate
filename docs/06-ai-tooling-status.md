@@ -7,9 +7,7 @@ not set up, so nobody re-discovers this the hard way.
 
 Several files in `.claude/agents/` (`ceo.md`, `design.md`, `eng.md`, `review.md`,
 `ship.md`) reference `gstack` plugin commands: `/office-hours`, `/plan-ceo-review`,
-`/plan-design-review`, `/plan-eng-review`, `/ship`. Unlike `superpowers` (removed,
-see below), this one is intentionally kept — it's the plugin this pipeline actually
-depends on.
+`/plan-design-review`, `/plan-eng-review`, `/ship`.
 
 **Confirmed status:** `gstack` is not on this machine's PATH and is not installed as
 a global npm package. If you invoke a pipeline stage that calls a `gstack` command,
@@ -20,14 +18,20 @@ brief, a spec, a design doc, running review, etc.) — the `gstack` commands are
 structured wrappers around behavior an agent can still do directly by following the
 rest of the file's instructions.
 
-## superpowers — removed from the pipeline
+## superpowers — NOT installed, but needed
 
-Previously referenced in `ceo.md`, `eng.md`, `build.md`, `testing.md`, and `ship.md`
-for `/brainstorm`, `/write-plan`, `/execute-plan`, and `/wrapup`. Determined not
-needed — every agent file now does that work directly (enumerate approaches, write
-the spec, implement, write the retrospective) without depending on the plugin. If
-you see a `superpowers` mention left in an agent file, it's only an explanatory
-note about the removal, not a live dependency.
+Referenced in `ceo.md`, `eng.md`, `build.md`, `testing.md`, and `ship.md` for
+`/brainstorm`, `/write-plan`, `/execute-plan`, and `/wrapup`.
+
+**Confirmed status:** `superpowers` is not on this machine's PATH and is not
+installed as a global npm package. If you invoke a pipeline stage that calls a
+`superpowers` command, that step will not run as written until it's actually
+installed and configured.
+
+**What still works without it:** every stage's core responsibilities (enumerate
+approaches, write the spec, implement, write the retrospective) — the
+`superpowers` commands are structured wrappers around behavior an agent can still
+do directly by following the rest of the file's instructions.
 
 ## claude-mem — installed (2026-07-10)
 

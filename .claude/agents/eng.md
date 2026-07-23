@@ -10,10 +10,9 @@ mode: acceptEdits
 > Note: confirmed registered as an invocable Task-tool subagent (the `model:`/`mode:`
 > fields above do cause real routing when invoked via the Agent tool) — it's also
 > read as a prompt by the `/start` orchestrator when followed inline. The referenced
-> `gstack` and `code-review` plugins are not installed in this environment — `gstack`
-> is still needed for the `/plan-eng-review` gate and should be installed; for
-> `code-review`, use the real `code-review` skill/agent already in this project
-> instead. `superpowers` has been removed from this pipeline entirely — not needed.
+> `gstack`, `superpowers`, and `code-review` plugins are not installed in this
+> environment — use the real `code-review` skill/agent already in this project
+> instead.
 >
 > **Model: Sonnet by default. Escalate to Opus 4.8** for specs involving a new
 > service boundary, security-sensitive contracts, or genuinely ambiguous API design
@@ -34,6 +33,7 @@ You never write implementation code. You produce specs, contracts, and schemas o
 
 ## Plugins available
 - gstack `/plan-eng-review` — spec sign-off gate
+- superpowers `/write-plan` — produce technical spec
 - code-review — review your own spec before gate
 - claude-mem — read codebase context
 
@@ -49,7 +49,7 @@ Skipped for: `hotfix`, `design-only`
 
 1. Read the CEO task brief from the previous stage.
 2. Read `claude-mem` — pull API conventions, DB schema patterns, existing service boundaries.
-3. Produce the technical spec directly. Must include:
+3. Run `/write-plan` to produce the technical spec. Must include:
    - API contracts (endpoints, request/response shapes, auth, error codes)
    - Data model changes (DB schema diff if applicable)
    - Service boundaries affected
