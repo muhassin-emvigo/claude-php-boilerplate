@@ -1,29 +1,15 @@
 {
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 300000,
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
-      "Read(*)",
-      "Edit(*)",
-      "Bash(composer *)",
-      "Bash(php *)",
-      "Bash(vendor/bin/phpcs *)",
-      "Bash(vendor/bin/phpstan *)",
-      "Bash(vendor/bin/phpunit *)",
-      "Bash(vendor/bin/phpmd *)",
-      "Bash(vendor/bin/php-cs-fixer *)",
-      "Bash(make *)",
-      "Bash(git status)",
-      "Bash(git diff *)",
-      "Bash(git log *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(find *)",
-      "Bash(grep *)",
-      "Bash(cat *)"
-    ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Bash(git push *)",
-      "Bash(git force *)"
+      "Bash(php vendor/bin/phpcs*)",
+      "Bash(vendor/bin/phpcs*)",
+      "Bash(php -l*)",
+      "Bash(php vendor/bin/phpstan*)",
+      "Bash(php8.4 vendor/bin/phpunit*)",
+      "Bash(xmllint --noout*)"
     ]
   },
   "hooks": {
@@ -36,6 +22,15 @@
             "command": "bash .claude/hooks/pre-commit-validate.sh"
           }
         ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash cavemen/scripts/md-procedure.sh pre"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -45,6 +40,15 @@
           {
             "type": "command",
             "command": "FILE=$(cat | python3 -c \"import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))\"); [ -n \"$FILE\" ] && php -l \"$FILE\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash cavemen/scripts/md-procedure.sh post"
           }
         ]
       }
