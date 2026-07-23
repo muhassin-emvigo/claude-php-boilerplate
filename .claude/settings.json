@@ -2,13 +2,31 @@
   "permissions": {
     "defaultMode": "bypassPermissions",
     "allow": [
-      "Bash(php vendor/bin/phpcs*)",
-      "Bash(vendor/bin/phpcs*)",
-      "Bash(php -l*)",
-      "Bash(php vendor/bin/phpstan*)",
-      "Bash(php8.4 vendor/bin/phpunit*)",
-      "Bash(xmllint --noout*)"
+      "Read(*)",
+      "Edit(*)",
+      "Bash(composer *)",
+      "Bash(php *)",
+      "Bash(vendor/bin/phpcs *)",
+      "Bash(vendor/bin/phpstan *)",
+      "Bash(vendor/bin/phpunit *)",
+      "Bash(vendor/bin/phpmd *)",
+      "Bash(vendor/bin/php-cs-fixer *)",
+      "Bash(make *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(cat *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push *)",
+      "Bash(git force *)"
     ]
+
   },
   "hooks": {
     "PreToolUse": [
