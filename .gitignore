@@ -39,6 +39,10 @@ var/
 *.env
 !.env.docker.example
 
+# Magento Marketplace credentials
+/auth.json
+!auth.json.example
+
 # Docker
 docker/data/
 
