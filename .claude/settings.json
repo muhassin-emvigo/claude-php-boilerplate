@@ -23,7 +23,17 @@
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push *)",
-      "Bash(git force *)"
+      "Bash(git force *)",
+      "Read(./vendor/**)",
+      "Edit(./vendor/**)",
+      "Read(./node_modules/**)",
+      "Edit(./node_modules/**)",
+      "Read(./generated/**)",
+      "Edit(./generated/**)",
+      "Read(./var/**)",
+      "Edit(./var/**)",
+      "Read(./pub/static/**)",
+      "Edit(./pub/static/**)"
     ]
   },
   "hooks": {
