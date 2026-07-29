@@ -44,7 +44,11 @@
             "@test"
         ],
         "post-install-cmd": [
-            "vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility/ 2>/dev/null || true"
+            "vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility/ 2>/dev/null || true",
+            "php scripts/fix-windows-vendor-bugs.php"
+        ],
+        "post-update-cmd": [
+            "php scripts/fix-windows-vendor-bugs.php"
         ]
     },
     "config": {
