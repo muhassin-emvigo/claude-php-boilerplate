@@ -1,6 +1,8 @@
 # Magento 2 PHP Boilerplate for Claude Code
 
-> Production-ready Magento 2 module skeleton with Claude Code integration — skills, rules, commands, hooks, and quality tooling out of the box.
+Production-ready Magento 2.4.x module skeleton with **integrated Claude Code integration** — AI-powered SDLC pipeline, quality tooling, skills, rules, and commands out of the box.
+
+> **AI-Assisted Development:** Use `/pipeline` to take features or bugs from raw request → shipped PR through planning, review gauntlets, TDD, testing gates, security review, docs, and ship. Or use traditional make commands for manual control.
 
 ## 🚀 Quick Start
 
@@ -9,33 +11,53 @@
 git clone <repo-url> my-magento-module
 cd my-magento-module
 
-# 2. Initialize (renames Vendor/ModuleName to your names)
+# 2. Install Claude dependencies (required for AI features)
+# See Prerequisites below
+
+# 3. Initialize (renames Vendor/ModuleName to your names)
 make init
 
-# 3. Install dependencies
+# 4. Install dependencies
 make install
 
-# 4. Verify environment
+# 5. Verify environment
 make check-setup
 
-# 5. Run the sample test
+# 6. Run sample test
 make test
 
-# 6. Start building!
+# 7. Start building!
 ```
 
-## ✨ What You Get
+## ✨ What's Inside
+
+### AI-Powered SDLC Pipeline
+
+**One command:** `/pipeline` orchestrates the entire workflow:
+
+| Stage | Purpose |
+|-------|---------|
+| **Classify** | Size request (nano vs full) |
+| **Plan** | Draft executable plan w/ brainstorming & spec |
+| **Review** | Parallel eng/design/CEO reviews (hard gate until you approve) |
+| **Execute** | Implementer builds with test-first if opted in |
+| **Quality** | Unit tests, QA scenarios, code review, security review (OWASP + STRIDE) |
+| **Ship** | Docs updated, PR merged |
+
+See [Usage: `/pipeline` Examples](#usage-pipeline-examples) below.
 
 ### Claude Code Integration
+
 | Feature | Location | Purpose |
 |---------|----------|---------|
 | **Skills** | `.claude/skills/` | Module scaffolding, test writing, code review |
 | **Rules** | `.claude/rules/` | PHP standards, Magento conventions, security, testing |
 | **Commands** | `.claude/commands/` | `/start`, `/review`, `/test`, `/lint`, `/ship`, `/status` |
-| **Agents** | `.claude/agents/` | Architect, reviewer, test-writer, security-auditor |
-| **Hooks** | `.claude/settings.json` | Auto PHP syntax check on every file edit |
+| **Agents** | `.claude/agents/` | Specialist sub-agents (planner, reviewer, implementer, etc.) |
+| **Hooks** | `.claude/settings.json` | Token tracking, context budgets, pre-commit validation |
 
 ### Quality Tooling
+
 | Tool | Command | Purpose |
 |------|---------|----------|
 | PHPUnit | `make test` | Unit & integration testing |
@@ -46,72 +68,233 @@ make test
 | CaptainHook | auto on commit | Pre-commit & pre-push hooks |
 
 ### Module Template
-A complete Magento 2.4.x module skeleton under `app/code/Vendor/ModuleName/` with:
+
+Complete Magento 2.4.x module skeleton at `app/code/Vendor/ModuleName/`:
 - `registration.php`, `module.xml`, `di.xml`, `acl.xml`
 - Frontend & admin route configuration
-- All standard directories (Api, Model, Controller, Plugin, Observer, etc.)
+- All standard directories (Api, Model, Controller, Plugin, Observer, ViewModel, etc.)
 - Sample PHPUnit test
 - Translation file
+- Declarative schema (`db_schema.xml`)
+
+## Prerequisites
+
+### For Magento Development (always required)
+
+- **PHP 8.2+**
+- **Composer 2.x**
+- **Git**
+- MySQL 8.0 or MariaDB 10.6+
+- Optional: OpenSearch 2.x, Redis 7.x, Docker
+
+### For AI-Powered Pipeline (`/pipeline` command)
+
+All three dependencies are **required** — `/pipeline` halts at preflight if any missing. Install **before** enabling the pipeline:
+
+#### Python 3
+
+Bundled hooks (`guard_context_budget.py`, `check_plan.py`) need **Python 3.8+** on your `PATH`:
+
+```bash
+# Verify
+python3 --version   # should print Python 3.8 or later
+```
+
+Install if missing:
+```bash
+# macOS (Homebrew)
+brew install python
+
+# Ubuntu / Debian
+sudo apt install python3
+
+# Windows (winget)
+winget install Python.Python.3
+```
+
+#### Claude Code + Plugins
+
+1. **Claude Code CLI** — install from [claude.com/code](https://claude.com/code)
+2. **superpowers** — provides brainstorming, writing-plans, executing-plans, test-driven-development
+   ```
+   /plugin marketplace add obra/superpowers-marketplace
+   /plugin install superpowers@superpowers-marketplace
+   ```
+3. **gstack** — provides `/office-hours`, `/spec`, `/ship`
+   ```
+   git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+   cd ~/.claude/skills/gstack && ./setup
+   ```
+4. **claude-mem** — persistent memory across sessions
+   ```
+   /plugin marketplace add thedotmack/claude-mem
+   /plugin install claude-mem
+   ```
+
+> [!IMPORTANT]
+> ⚠️ 5-minute prompt cache active. Set `ENABLE_PROMPT_CACHING_1H=1` and restart for ~25% lower cost.
+
+## Installation
+
+### 1. Project Setup
+
+```bash
+git clone <repo-url> my-magento-module
+cd my-magento-module
+make init           # Rename Vendor/ModuleName
+make install        # Composer dependencies
+make check-setup    # Verify environment
+```
+
+### 2. Claude Code Setup (optional, enables `/pipeline`)
+
+1. Install Python 3 and plugin dependencies (see [Prerequisites](#for-ai-powered-pipeline-pipeline-command) above)
+2. Add marketplace:
+   ```
+   /plugin marketplace add nithinemvigo/sdlc-pipeline
+   ```
+3. Install plugin:
+   ```
+   /plugin install sdlc-pipeline@sdlc-pipeline-dev
+   ```
+4. Restart Claude or run `/reload-plugins`
+5. Verify: type `/` and confirm `/pipeline` appears
+
+### 3. Full Magento Setup (if building a full storefront, not just a module)
+
+#### Docker (recommended)
+```bash
+cd docker
+cp .env.docker.example .env
+docker compose up -d
+# Services: PHP 8.2-FPM, Nginx, MySQL, OpenSearch, Redis, Mailhog
+```
+
+#### Windows/XAMPP (native, no Docker)
+```powershell
+copy auth.json.example auth.json  # Add Magento Marketplace keys
+make magento-install
+make magento-run
+```
+
+See [docs/install-magento/](docs/install-magento/) for full step-by-step walkthrough.
+
+## Usage
+
+### Option A: AI-Assisted with `/pipeline`
+
+#### Example 1 — Build a feature
+```
+/pipeline Add CSV export to the reports page
+```
+
+**What happens:**
+1. Classify request (nano vs full)
+2. Ask preferences: bug/feature, test-first, unit tests?
+3. Plan with superpowers `brainstorming` + `/office-hours`
+4. Parallel reviews: eng-reviewer, design-reviewer, ceo-reviewer
+5. **You approve plan** (hard gate, no code until yes)
+6. Implementer builds on dedicated branch
+7. Quality gates: unit tests, QA scenarios, code review, security review
+8. Docs & ship
+
+#### Example 2 — Fix a bug
+```
+/pipeline Login button does nothing after session timeout
+```
+
+Skips planner; `investigator` does root-cause analysis → mini-plan in `docs/bugs/` → execution.
+
+#### Example 3 — Tiny change (nano tier)
+```
+/pipeline Fix the typo in the welcome banner
+```
+
+Skips planning & reviews: `implementer` → `code-reviewer` → `ship-pr`. Fast path, still reviewed.
+
+### Option B: Manual with Make Commands
+
+```bash
+make help           # Show all commands
+make test           # Run PHPUnit
+make test-coverage  # Tests + HTML coverage report
+make lint           # Run PHPCS
+make lint-fix       # Auto-fix with PHP-CS-Fixer
+make phpstan        # Static analysis
+make phpmd          # Mess detection
+make check          # Run ALL quality checks
+make usage          # Show token/cost usage
+```
+
+### Claude Slash Commands (all modes)
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Initialize session, check environment, show context |
+| `/review` | Run PHPCS + PHPStan + PHPMD, provide review |
+| `/test` | Run tests, report results & coverage |
+| `/lint` | Run all linters, offer to auto-fix |
+| `/ship` | Full pre-push pipeline (lint → test → security → changelog) |
+| `/status` | Quick health dashboard |
 
 ## 📁 Directory Structure
 
 ```
-├── .claude/                    # Claude Code configuration
-│   ├── settings.json           # Permissions & hooks
-│   ├── agents/                 # AI agent personas
-│   ├── commands/               # Slash commands
-│   ├── rules/                  # Coding rules (glob-scoped)
-│   └── skills/                 # Modular skills
-├── CLAUDE.md                   # Claude context document
-├── app/code/Vendor/ModuleName/ # Module source template
-├── composer.json               # Dependencies
-├── phpunit.xml.dist            # PHPUnit config
-├── phpcs.xml.dist              # PHPCS config
-├── phpstan.neon.dist           # PHPStan config
-├── phpmd.xml.dist              # PHPMD config
-├── captainhook.json            # Git hooks
-├── Makefile                    # Developer commands
-├── scripts/                    # Setup & utility scripts
-└── docker/                     # Optional Docker setup
+├── .claude/                        # Claude Code configuration
+│   ├── agents/                     # Specialist sub-agents
+│   ├── commands/                   # Slash commands
+│   ├── hooks/                      # Context budget, pre-commit validation
+│   ├── rules/                      # Coding rules (glob-scoped, priority-ordered)
+│   └── skills/                     # Modular development skills
+├── CLAUDE.md                       # Claude context document
+├── app/code/Vendor/ModuleName/     # Module source template
+│   ├── Api/                        # Service contract interfaces
+│   ├── Block/                      # Block classes
+│   ├── Controller/                 # Request handlers
+│   ├── Helper/                     # Helper classes
+│   ├── Model/                      # Business logic
+│   ├── Observer/                   # Event observers
+│   ├── Plugin/                     # Interceptors
+│   ├── Setup/Patch/                # Data patches
+│   ├── ViewModel/                  # Presentation logic
+│   ├── etc/                        # Configuration XML
+│   ├── view/                       # Templates, layouts, assets
+│   ├── i18n/                       # Translations
+│   └── Test/                       # PHPUnit tests
+├── composer.json                   # Dependencies
+├── phpunit.xml.dist                # PHPUnit config
+├── phpcs.xml.dist                  # PHPCS config
+├── phpstan.neon.dist               # PHPStan config
+├── phpmd.xml.dist                  # PHPMD config
+├── captainhook.json                # Git hooks
+├── Makefile                        # Developer commands
+├── scripts/                        # Setup & utility scripts
+└── docker/                         # Optional Docker setup
 ```
 
-## 🛠 Make Commands
+## 🛠 Make Commands (quick reference)
 
 ```bash
-make help           # Show all available commands
-make init           # First-time setup (rename Vendor/ModuleName)
-make install        # Install Composer dependencies
-make magento-install # Install/upgrade full Magento core (Windows/XAMPP, native)
-make magento-run    # Start MySQL/OpenSearch/Apache and open the storefront
-make fix-windows    # Re-apply Windows compatibility fixes to vendor/
-make test           # Run PHPUnit tests
-make test-coverage  # Run tests with HTML coverage
-make lint           # Run PHPCS
-make lint-fix       # Auto-fix with PHP-CS-Fixer
-make phpstan        # Run PHPStan
-make phpmd          # Run PHPMD
-make check          # Run ALL quality checks
-make check-setup    # Verify environment
-make clean          # Clean generated files
-make usage          # Show local Claude Code token/cost usage
+make init            # First-time: rename Vendor/ModuleName
+make install         # Install Composer dependencies
+make test            # Run PHPUnit tests
+make test-coverage   # Tests with HTML coverage
+make lint            # Run PHPCS (Magento2 standard)
+make lint-fix        # Auto-fix with PHP-CS-Fixer
+make phpstan         # PHPStan static analysis (level 6)
+make phpmd           # PHPMD mess detection
+make check           # Run ALL quality checks
+make check-setup     # Verify environment
+make magento-install # Install full Magento core (Docker or native)
+make magento-run     # Start services & open storefront
+make fix-windows     # Re-apply Windows vendor bugfixes
+make clean           # Clean generated files
+make usage           # Show Claude token usage
 ```
-
-## 🤖 Claude Slash Commands
-
-When working with Claude Code, use these commands:
-
-| Command | Description |
-|---------|-------------|
-| `/start` | Initialize a dev session, check environment, show context |
-| `/review` | Run PHPCS + PHPStan + PHPMD on changed files, provide review |
-| `/test` | Run tests, report results and coverage |
-| `/lint` | Run all linters, offer to auto-fix |
-| `/ship` | Full pre-push pipeline (lint → test → security → changelog) |
-| `/status` | Quick project health dashboard |
 
 ## 🐳 Docker (Optional)
 
-A Docker Compose setup is included for local development:
+Complete stack for local development:
 
 ```bash
 cd docker
@@ -121,62 +304,105 @@ docker compose up -d
 
 Services: PHP 8.2-FPM, Nginx, MySQL 8.0, OpenSearch 2.x, Redis 7, Mailhog.
 
-Or one-shot: `bash scripts/install-magento.sh` (wraps the steps above, pins `magento/product-community-edition` to `2.4.7-p8`).
-
 ## 🪟 Full Magento Install (Windows/XAMPP, no Docker)
 
-For installing the full Magento core natively against a local XAMPP stack instead of Docker:
-
 ```powershell
-copy auth.json.example auth.json               # fill in your Magento Marketplace public/private keys
-make magento-install                            # or: .\scripts\install-magento-xampp.ps1
-make magento-run                                # or: .\scripts\start-magento.ps1 — starts MySQL/OpenSearch/Apache, opens the site
+copy auth.json.example auth.json  # Add Magento Marketplace keys
+make magento-install              # Install full Magento core
+make magento-run                  # Start MySQL/OpenSearch/Apache
 ```
 
-`scripts/install-magento-xampp.ps1` checks PHP/extensions, sets up Composer auth, creates the `magento` database, installs Magento core via Composer, applies known Windows-only Magento core bugfixes (`make fix-windows` / `scripts/fix-windows-vendor-bugs.php` — drive-letter, backslash, and `|`-in-filename issues that only surface on Windows), and runs `setup:install`. Safe to re-run — it upgrades instead of reinstalling if `app/etc/env.php` already exists. Requires OpenSearch (or Elasticsearch) reachable on `localhost:9200` — `scripts/start-magento.ps1` starts a local OpenSearch automatically if installed at `C:\opensearch\opensearch-2.11.0`.
+Script checks PHP/extensions, sets up Composer auth, creates DB, installs Magento core, applies Windows bugfixes (drive letters, backslashes, filename issues), and runs setup:install. Safe to re-run — upgrades if env.php exists.
 
-### Magento Marketplace keys
+Requires OpenSearch on localhost:9200 — `make magento-run` starts it automatically if installed.
 
-Composer needs these to pull `magento/product-community-edition` from `repo.magento.com` — without them, both the Docker and native install paths fail at the Composer step.
+### Magento Marketplace Keys
 
-1. Create a free account at [marketplace.magento.com](https://marketplace.magento.com/).
-2. Go to **My Profile → Access Keys** and generate a key pair (Public key = username, Private key = password).
-3. Put them in **one** of:
-   - `auth.json` (root, copy from `auth.json.example`) — used by the native XAMPP path
-   - `docker/.env` as `MAGENTO_PUBLIC_KEY` / `MAGENTO_PRIVATE_KEY` — used by the Docker path (`scripts/install-magento.sh` also back-fills `auth.json` from this if present)
+Needed to pull `magento/product-community-edition`:
 
-Never commit real keys — `auth.json` and `docker/.env` are gitignored; only the `.example` templates are tracked.
+1. Create account at [marketplace.magento.com](https://marketplace.magento.com/)
+2. Go to **My Profile → Access Keys**, generate key pair
+3. Add to **one** of:
+   - `auth.json` (root, copy from `auth.json.example`) — used by native XAMPP path
+   - `docker/.env` as `MAGENTO_PUBLIC_KEY` / `MAGENTO_PRIVATE_KEY` — used by Docker
 
-Full step-by-step walkthrough, OS-specific prerequisites, and troubleshooting: [docs/install-magento/](docs/install-magento/).
+Both are gitignored; only `.example` templates tracked.
 
 ## 📝 Customization
 
 ### Adding a New Module
-1. Create `app/code/YourVendor/NewModule/`
-2. Add `registration.php` and `etc/module.xml`
-3. Update root `composer.json` autoload
-4. Write tests in `Test/Unit/`
+
+```bash
+mkdir -p app/code/YourVendor/NewModule/etc
+# Add registration.php and etc/module.xml
+# Update root composer.json autoload
+# Write tests in Test/Unit/
+```
 
 ### Adding Claude Rules
-Create a new `.md` file in `.claude/rules/` with glob frontmatter:
+
+Create `.md` file in `.claude/rules/` with glob frontmatter:
+
 ```yaml
 ---
 globs:
   - "**/*.php"
+priority: 30
 ---
 # Your custom rules here
 ```
 
+See `.claude/rules/README.md` for priority guidance.
+
 ### Adding Claude Skills
-Create a directory in `.claude/skills/<skill-name>/` with a `SKILL.md` file.
+
+Create directory `.claude/skills/<skill-name>/` with `SKILL.md`.
 
 ## 📋 Requirements
 
-- PHP 8.2+
-- Composer 2.x
-- Git
-- Claude CLI (optional, for AI features)
+- **PHP 8.2+** (strict_types, readonly, constructor promotion, enums, match, union types)
+- **Composer 2.x**
+- **Git**
+- **MySQL 8.0** or **MariaDB 10.6+**
+- **Claude Code CLI** (optional, for AI features — not needed for manual development)
 
 ## 📄 License
 
-MIT
+MIT — free to use, modify, and distribute. See [`LICENSE`](LICENSE).
+
+---
+
+## Workflow Diagram (with `/pipeline`)
+
+```
+request
+   │
+   ▼
+Stage 0    Classify (nano fast-path ─────────────────────┐)
+Stage 0.5  Your preferences: bug/feature, TDD, unit tests │
+   │                                                      │
+   ├── FEATURE ──► Stage 1  Plan (planner)                │
+   │               Stage 2  Plan reviews ∥ (eng/design/ceo)
+   │               Stage 2.5  ★ YOU APPROVE THE PLAN ★    │
+   │               Stage 2.7  ADR (if architecture changes)
+   │                                                      │
+   └── BUG ──────► Stage 1-B  Investigate (root cause)    │
+   │                                                      │
+   ▼                                                      │
+Stage 3    Execute on dedicated branch (TDD if on) ◄──────┘
+Stage 4    Unit-test gate (if opted in)
+Stage 4.5  QA scenario gate (if user-facing)
+Stage 5    Code review ∥ Security review (OWASP + STRIDE)
+Stage 5.5  Performance gate (if perf-sensitive)
+Stage 5.8  Documentation
+Stage 6    Ship PR
+```
+
+`∥` = stages run in parallel. Token usage tracked per run.
+
+## Hard Rules Enforced
+
+- No production code before plan approval (Stage 2.5 is hard gate)
+- Orchestrator never writes code — only specialist agents do
+- Reviewers read-only, report-only; never "fix while reviewing"
+- Implementers sequential (share working tree); reviewers parallel
