@@ -148,6 +148,8 @@ make check-setup    # Verify environment
 
 ### 2. Claude Code Setup (optional, enables `/pipeline`)
 
+#### Claude Code (CLI)
+
 1. Install Python 3 and plugin dependencies (see [Prerequisites](#for-ai-powered-pipeline-pipeline-command) above)
 2. Add marketplace:
    ```
@@ -159,6 +161,33 @@ make check-setup    # Verify environment
    ```
 4. Restart Claude or run `/reload-plugins`
 5. Verify: type `/` and confirm `/pipeline` appears
+
+#### Claude Cowork / Claude Desktop
+
+1. Open the **Customize** menu in the left sidebar, then the **Plugins** tab
+2. In **Personal plugins**, click **+** → **Add marketplace** → **Add from a repository**
+3. Paste: `https://github.com/nithinemvigo/sdlc-pipeline`
+4. Once marketplace syncs, click **Install** on **sdlc-pipeline**
+5. Start a new conversation for plugin to take effect
+
+Note: hooks and sub-agents run in Cowork and Claude Code; in plain chat only skills available.
+
+#### Cursor
+
+1. Open Cursor **Settings** → **Plugins** (or **Rules & Memories → Plugins**, depending on version)
+2. Click **Add Plugin** → **From Git repository**
+3. Paste: `https://github.com/nithinemvigo/sdlc-pipeline`
+4. Cursor reads `.cursor-plugin/plugin.json` and installs plugin
+5. Reload Cursor window (`Cmd/Ctrl+Shift+P` → "Reload Window")
+
+Alternatively, clone repo and copy `agents/` and `commands/` into project's `.cursor/` directory if version doesn't support Git plugin installs.
+
+#### Updating
+
+Marketplace installs don't auto-pull commits. Get latest:
+
+- **Claude Code:** `/plugin marketplace update sdlc-pipeline-dev`
+- **Cowork/Desktop:** Customize → Plugins → find marketplace → ⋯ menu → **Update**, then start new session
 
 ### 3. Full Magento Setup (if building a full storefront, not just a module)
 
