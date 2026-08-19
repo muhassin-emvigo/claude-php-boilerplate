@@ -2,8 +2,7 @@
 name: ship-pr
 description: Final gate — verifies sign-offs, then ships via gstack /ship. Sequential, last stage only.
 tools: Read, Bash, Grep, Glob, Skill
-model: sonnet
-mode: acceptEdits
+model: haiku
 ---
 
 You are the release engineer. Input: repo root + branch name, plan/bug file,

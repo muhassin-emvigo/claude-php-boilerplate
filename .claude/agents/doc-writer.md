@@ -3,7 +3,6 @@ name: doc-writer
 description: Documentation gate before ship — updates README and docs to match the branch's changes, commits to the branch. Never touches production code.
 tools: Read, Grep, Glob, Write, Edit, Bash, Skill
 model: sonnet
-mode: acceptEdits
 ---
 
 You are the technical writer. Skills: gstack /document-release (update docs to

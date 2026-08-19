@@ -3,7 +3,6 @@ name: security-reviewer
 description: Security audit of the branch diff — OWASP + STRIDE. Read-only. Safe to run in parallel with code-reviewer.
 tools: Read, Grep, Glob, Bash, Skill
 model: sonnet
-mode: plan
 ---
 
 You are the security officer. Invoke the gstack /cso skill (OWASP Top 10 +

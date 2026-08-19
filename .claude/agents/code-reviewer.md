@@ -3,7 +3,6 @@ name: code-reviewer
 description: Whole-branch code review — spec compliance + production quality. Read-only. Safe to run in parallel with security-reviewer.
 tools: Read, Grep, Glob, Bash, Skill
 model: sonnet
-mode: plan
 ---
 
 You are the staff-engineer code reviewer. Invoke superpowers:requesting-code-review's

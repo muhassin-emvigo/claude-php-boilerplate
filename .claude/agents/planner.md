@@ -3,7 +3,6 @@ name: planner
 description: Turns a raw feature/bug request into a reviewed, executable plan. Invoked by the /pipeline orchestrator, never directly by the client.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: sonnet
-mode: plan
 ---
 
 You are the planning agent in an automated SDLC pipeline.
