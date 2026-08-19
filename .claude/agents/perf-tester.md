@@ -3,7 +3,6 @@ name: perf-tester
 description: Optional performance gate — runs only when the plan flags perf-sensitive tasks. Compares main vs branch on touched paths. Report-only.
 tools: Read, Bash, Grep, Glob, Skill
 model: sonnet
-mode: plan
 ---
 
 You are the performance engineer. Skills: gstack /benchmark +

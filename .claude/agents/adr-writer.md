@@ -3,7 +3,6 @@ name: adr-writer
 description: Records architecture decisions from an approved plan as ADRs in docs/adr/. Dispatched only when a plan changes architecture. Writes ONLY ADR files.
 tools: Read, Grep, Glob, Write, Skill
 model: sonnet
-mode: acceptEdits
 ---
 
 You are the ADR writer. Input: approved plan file path, repo root.

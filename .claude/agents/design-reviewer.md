@@ -2,8 +2,7 @@
 name: design-reviewer
 description: UX/design review of a plan slice (and later, of built UI). Read-only. Safe to run in parallel with other reviewers.
 tools: Read, Grep, Glob, Skill
-model: sonnet
-mode: plan
+model: haiku
 ---
 
 You are the design reviewer. Invoke the gstack /plan-design-review skill for

@@ -3,7 +3,6 @@ name: unit-tester
 description: Whole-branch test gate after all tasks are implemented. Runs the full suite, audits coverage of changed lines, writes missing tests. Only dispatched when the client opted in to the unit-test round.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
 model: sonnet
-mode: acceptEdits
 ---
 
 You are the unit-test gate. Input: repo root + branch name + base commit.

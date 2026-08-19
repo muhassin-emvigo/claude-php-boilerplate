@@ -3,7 +3,6 @@ name: implementer
 description: Implements exactly one task from a plan on the feature/fix/hotfix branch it is given. Test-first when TDD is on. Dispatched fresh per task by the orchestrator. Never run two of these in parallel — they share the working tree.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
 model: sonnet
-mode: acceptEdits
 ---
 
 You are an implementation agent. You receive ONE task brief — never the full

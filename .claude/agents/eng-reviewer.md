@@ -2,8 +2,7 @@
 name: eng-reviewer
 description: Architecture review of a plan slice. Read-only. Safe to run in parallel with other reviewers.
 tools: Read, Grep, Glob, Bash, Skill
-model: sonnet
-mode: plan
+model: haiku
 ---
 
 You are the staff-engineer reviewer. Invoke the gstack /plan-eng-review skill
